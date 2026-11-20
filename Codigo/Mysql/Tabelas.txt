@@ -1,0 +1,200 @@
+-- ======================================================
+-- Financas_Ja - Schema Melhorado
+-- Compatível MySQL 5.7+ / 8.0+
+-- ======================================================
+
+CREATE DATABASE IF NOT EXISTS financas_ja
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE financas_ja;
+
+-- ======================================================
+-- 1) USUÁRIOS
+-- ======================================================
+CREATE TABLE usuarios (
+  id_usuario INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(150) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  senha VARCHAR(255) NOT NULL,
+  status ENUM('ativo','inativo','pendente','bloqueado') NOT NULL DEFAULT 'ativo',
+  role ENUM('user','admin','financeiro') NOT NULL DEFAULT 'user',
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  ultimo_login DATETIME NULL,
+  last_login_ip VARCHAR(45) NULL,
+  tentativa_login INT UNSIGNED NOT NULL DEFAULT 0,
+  bloqueado_ate DATETIME NULL,
+  UNIQUE KEY ux_usuario_email (email),
+  INDEX idx_usuario_status (status),
+  INDEX idx_usuario_role (role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ======================================================
+-- 2) CATEGORIAS
+-- ======================================================
+CREATE TABLE categorias (
+  id_categoria INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  tipo ENUM('despesa','receita') NOT NULL DEFAULT 'despesa',
+  descricao VARCHAR(255) DEFAULT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  UNIQUE KEY ux_categorias_nome_tipo (nome, tipo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ======================================================
+-- 3) GASTOS
+-- ======================================================
+CREATE TABLE gastos (
+  id_gasto INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  categoria_id INT UNSIGNED DEFAULT NULL,
+  descricao VARCHAR(255) NOT NULL,
+  valor DECIMAL(12,2) NOT NULL,
+  moeda CHAR(3) NOT NULL DEFAULT 'BRL',
+  tipo ENUM('fixo','variavel') NOT NULL DEFAULT 'variavel',
+  metodo_pagamento VARCHAR(50) DEFAULT NULL,
+  data_gasto DATE NOT NULL,
+  recorrente TINYINT(1) NOT NULL DEFAULT 0,
+  recorrencia_rule VARCHAR(255) DEFAULT NULL,
+  observacoes TEXT DEFAULT NULL,
+  anexo_url VARCHAR(512) DEFAULT NULL,
+  status ENUM('ativo','cancelado','pendente') NOT NULL DEFAULT 'ativo',
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_usuario_data_gasto (id_usuario, data_gasto),
+  INDEX idx_categoria (categoria_id),
+  INDEX idx_status (status),
+  INDEX idx_data_gasto (data_gasto),
+  CONSTRAINT fk_gastos_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id_usuario)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_gastos_categoria FOREIGN KEY (categoria_id)
+    REFERENCES categorias(id_categoria)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ======================================================
+-- 4) RECEITAS
+-- ======================================================
+CREATE TABLE receitas (
+  id_receita INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  descricao VARCHAR(255) NOT NULL DEFAULT 'Renda Mensal',
+  valor DECIMAL(12,2) NOT NULL,
+  data_receita DATE NOT NULL,
+  tipo ENUM('fixa','variavel') NOT NULL DEFAULT 'fixa',
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_usuario_data_receita (id_usuario, data_receita),
+  CONSTRAINT fk_receitas_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id_usuario)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ======================================================
+-- 5) METAS
+-- ======================================================
+CREATE TABLE metas (
+  id_meta INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  titulo VARCHAR(150) NOT NULL,
+  valor_meta DECIMAL(12,2) NOT NULL,
+  valor_atual DECIMAL(12,2) NOT NULL DEFAULT 0,
+  data_inicio DATE NOT NULL,
+  data_fim DATE NOT NULL,
+  status ENUM('ativa','concluida','cancelada') NOT NULL DEFAULT 'ativa',
+  CONSTRAINT fk_metas_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id_usuario)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ======================================================
+-- INSERIR CATEGORIAS PADRÃO
+-- ======================================================
+INSERT INTO categorias (id_categoria, nome, tipo, descricao, ativo) VALUES
+(1, 'Alimentação', 'despesa', 'Gastos com comida, restaurantes, supermercado', 1),
+(2, 'Energia', 'despesa', 'Conta de luz, energia elétrica', 1),
+(3, 'Transporte', 'despesa', 'Combustível, transporte público, manutenção de veículo', 1),
+(4, 'Lazer', 'despesa', 'Entretenimento, hobbies, viagens', 1);
+
+
+-- ======================================================
+-- 6) PERFIL COGNITIVO (estado atual do usuário)
+-- ======================================================
+
+CREATE TABLE perfil_cognitivo (
+  id_perfil INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  vies_predominante VARCHAR(100) NOT NULL,
+  intensidade DECIMAL(5,2) NOT NULL,
+  nivel VARCHAR(50) NOT NULL,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
+    ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY ux_usuario_perfil (id_usuario),
+  INDEX idx_usuario (id_usuario),
+
+  CONSTRAINT fk_perfil_usuario 
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id_usuario)
+    ON DELETE CASCADE
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- ======================================================
+-- 7) HISTÓRICO DE VIÉS (evolução comportamental)
+-- ======================================================
+
+CREATE TABLE historico_vies (
+  id_registro INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  vies_identificado VARCHAR(100) NOT NULL,
+  intensidade DECIMAL(5,2) NOT NULL,
+  nivel VARCHAR(50) NOT NULL,
+  data_analise TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_usuario_data (id_usuario, data_analise),
+
+  CONSTRAINT fk_historico_usuario 
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id_usuario)
+    ON DELETE CASCADE
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+
+CREATE TABLE historico_pontos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  pontos INT NOT NULL,
+  tipo ENUM('ganho','perda','bonus','aposta') NOT NULL,
+  descricao VARCHAR(255),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
+
+CREATE TABLE apostas (
+  id_aposta INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT UNSIGNED NOT NULL,
+  id_meta INT UNSIGNED NOT NULL,
+  pontos_apostados INT NOT NULL,
+  resultado ENUM('ganhou','perdeu','pendente') DEFAULT 'pendente',
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+  FOREIGN KEY (id_meta) REFERENCES metas(id_meta)
+) ENGINE=InnoDB;
+
+
+ALTER TABLE usuarios 
+ADD COLUMN telefone VARCHAR(20) NULL AFTER email,
+ADD COLUMN notificacoes TINYINT(1) NOT NULL DEFAULT 1 AFTER role,
+ADD COLUMN emails_semanais TINYINT(1) NOT NULL DEFAULT 0 AFTER notificacoes,
+ADD COLUMN plano ENUM('free', 'premium') NOT NULL DEFAULT 'free' AFTER emails_semanais;
