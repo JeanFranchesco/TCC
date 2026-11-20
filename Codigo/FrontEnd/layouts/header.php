@@ -3,10 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Define id_usuario temporário (para testes)
-// ⚠️ Enquanto não existir uma tela de login de verdade, qualquer
-// visitante sem sessão ativa vira automaticamente o usuário 1.
-// Antes de publicar de verdade: trocar por um redirect para login.
+// Usuário temporário para desenvolvimento; trocar por redirecionamento ao login antes de publicar
 if (!isset($_SESSION['id_usuario'])) {
     $_SESSION['id_usuario'] = 1;
 }
@@ -16,12 +13,12 @@ if (!isset($page_title)) {
     $page_title = 'Painel';
 }
 
-// Controle botão exportar
+// Controle do botão Exportar
 if (!isset($show_export_button)) {
     $show_export_button = false;
 }
 
-// CONTROLE: usar só o header (sem html/head/body)
+// Renderiza apenas o cabeçalho, sem html/head/body
 $header_only = $header_only ?? false;
 ?>
 
@@ -36,7 +33,7 @@ $header_only = $header_only ?? false;
 
     <title>Finanças Já • <?php echo htmlspecialchars($page_title); ?></title>
 
-    <!-- Bootstrap Icons -->
+    <!-- Ícones do Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Fontes -->
@@ -50,7 +47,7 @@ $header_only = $header_only ?? false;
     <link rel="stylesheet" href="../CSS/base.css">
     <link rel="stylesheet" href="../CSS/menu.css">
 
-    <!-- ✅ Tailwind gerado localmente -->
+    <!-- Tailwind (gerado localmente) -->
     <link rel="stylesheet" href="../CSS/tailwind.css?v=<?php echo time(); ?>">
 
     <!-- Font Awesome -->
@@ -59,12 +56,12 @@ $header_only = $header_only ?? false;
 <body>
 <?php endif; ?>
 
-<!-- HEADER -->
+<!-- Cabeçalho -->
 <header class="top-header" role="banner">
     <div class="max-w-7xl mx-auto px-8 py-4">
         <div class="flex justify-between items-center">
 
-            <!-- LOGO -->
+            <!-- Logo -->
             <div class="flex items-center gap-3">
                 <button id="sidebarToggle" class="btn btn-ghost lg:hidden text-2xl">
                     <i class="bi bi-list"></i>
@@ -82,7 +79,7 @@ $header_only = $header_only ?? false;
                 </div>
             </div>
 
-            <!-- BOTÕES -->
+            <!-- Botões -->
             <div class="flex items-center gap-3">
                 <button id="themeToggle" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-xl transition">
                     <i class="bi bi-moon-stars" id="themeIcon"></i>

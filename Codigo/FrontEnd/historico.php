@@ -1,25 +1,23 @@
 <?php
-// ================================================
-// HISTÓRICO.PHP - Versão padronizada
-// ================================================
+// Página de histórico
 
 $page_title = 'Histórico';
-$show_export_button = false;   // ← botão Exportar fica escondido nesta página
+$show_export_button = false; // Oculta o botão Exportar
 
 include 'layouts/header.php';
 ?>
 
-<!-- CSS específico desta página -->
+<!-- CSS desta página -->
 <link rel="stylesheet" href="../CSS/historico.css" />
 
-<!-- Loading Overlay -->
+<!-- Tela de carregamento -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner"></div>
 </div>
 
-<!-- Main Content -->
+<!-- Conteúdo principal -->
 <main class="main-content container mt-4">
-    <!-- Page Header -->
+    <!-- Cabeçalho da página -->
     <div class="page-header">
         <h1 class="page-title">
             <i class="bi bi-clock-history"></i>
@@ -28,7 +26,7 @@ include 'layouts/header.php';
         <p class="page-subtitle">Acompanhe seus gastos e receitas ao longo do ano</p>
     </div>
 
-    <!-- Year Selector -->
+    <!-- Seletor de ano -->
     <div class="year-selector">
         <button id="prevYear" type="button">
             <i class="bi bi-chevron-left"></i>
@@ -39,7 +37,7 @@ include 'layouts/header.php';
         </button>
     </div>
 
-    <!-- Annual Chart -->
+    <!-- Gráfico anual -->
     <div class="chart-card">
         <div class="chart-header">
             <h2 class="chart-title">
@@ -52,19 +50,19 @@ include 'layouts/header.php';
         </div>
     </div>
 
-    <!-- Months Grid -->
+    <!-- Grade de meses -->
     <div class="months-section">
         <h2 class="section-title">
             <i class="bi bi-calendar-month"></i>
             Visão Mensal
         </h2>
         <div class="months-grid" id="monthsGrid">
-            <!-- Months will be inserted here by JavaScript -->
+            <!-- Meses inseridos via JavaScript -->
         </div>
     </div>
 </main>
 
-<!-- Month Details Modal -->
+<!-- Modal de detalhes do mês -->
 <div class="modal fade" id="monthModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -74,18 +72,18 @@ include 'layouts/header.php';
             </div>
             <div class="modal-body">
                 <div class="modal-summary" id="modalSummary">
-                    <!-- Summary will be inserted here -->
+                    <!-- Resumo inserido via JavaScript -->
                 </div>
                 <h4 class="mb-3">Transações do Mês</h4>
                 <ul class="expense-list" id="expenseList">
-                    <!-- Expenses will be inserted here -->
+                    <!-- Transações inseridas via JavaScript -->
                 </ul>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Toast Container -->
+<!-- Container de toasts -->
 <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
 <!-- Scripts -->

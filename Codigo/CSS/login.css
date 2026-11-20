@@ -1,9 +1,4 @@
-        /* ============================================
-           Finanças Já - Login Page
-           Modern Authentication Design
-           ============================================ */
-
-        :root {
+:root {
             --color-bg-primary: #0a0a0b;
             --color-bg-secondary: #0f0f11;
             --color-bg-tertiary: #141416;
@@ -84,7 +79,7 @@
             transition: background-color var(--transition-base);
         }
 
-        /* Navbar */
+        /* Barra de navegação */
         .navbar {
             background: var(--color-surface) !important;
             border-bottom: 1px solid var(--color-border);
@@ -163,7 +158,7 @@
             padding: 0;
         }
 
-        /* Page Container */
+        /* Container da página */
         .page-center {
             flex: 1;
             display: flex;
@@ -190,7 +185,7 @@
             50% { transform: translate(30px, -30px); }
         }
 
-        /* Login Container */
+        /* Container do login */
         .login-container {
             width: 100%;
             max-width: 1100px;
@@ -215,7 +210,7 @@
             }
         }
 
-        /* Left Side */
+        /* Lado esquerdo */
         .login-left {
             background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
             padding: 4rem 3rem;
@@ -295,7 +290,7 @@
             font-size: 1.25rem;
         }
 
-        /* Right Side */
+        /* Lado direito */
         .login-right {
             background: var(--color-bg-secondary);
             padding: 4rem 3rem;
@@ -327,7 +322,7 @@
             letter-spacing: -0.02em;
         }
 
-        /* Forms */
+        /* Formulários */
         .form-wrapper {
             width: 100%;
             max-width: 420px;
@@ -420,7 +415,7 @@
             font-size: 1rem;
         }
 
-        /* Feedback Messages */
+        /* Mensagens de feedback */
         .feedback {
             padding: 1rem;
             border-radius: var(--radius-md);
@@ -497,7 +492,7 @@
             margin-left: 1rem;
         }
 
-        /* Utilities */
+        /* Utilitários */
         .visually-hidden:not(:focus):not(:active) {
             position: absolute;
             width: 1px;
@@ -514,7 +509,7 @@
             display: none !important;
         }
 
-        /* Loading State */
+        /* Estado de carregamento */
         .btn-loading {
             position: relative;
             pointer-events: none;
@@ -535,7 +530,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
+        /* Responsividade */
         @media (max-width: 768px) {
             .page-center {
                 padding: 1rem;

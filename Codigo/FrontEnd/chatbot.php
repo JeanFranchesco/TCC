@@ -1,9 +1,6 @@
-<!-- ═══════════════════════════════════════════════
-     CHAT WIDGET — Design Premium · Finanças Já
-     Lógica 100% preservada, apenas visual refatorado
-═══════════════════════════════════════════════ -->
+<!-- Widget de chat do Finanças Já -->
 <style>
-/* ─── TOKENS (herda do projeto) ─── */
+/* Variáveis */
 #fj-chat-root {
     --c-bg:        #0e0e12;
     --c-surface:   #13131a;
@@ -20,7 +17,7 @@
     font-family: 'DM Sans', 'Segoe UI', sans-serif;
 }
 
-/* ─── BOTÃO FLUTUANTE ─── */
+/* Botão flutuante */
 #fj-chat-toggle {
     position: fixed;
     bottom: 28px;
@@ -53,7 +50,7 @@
     50%      { box-shadow: 0 8px 28px rgba(255,145,0,0.35), 0 0 0 10px rgba(255,145,0,0); }
 }
 
-/* ─── JANELA DO CHAT ─── */
+/* Janela do chat */
 #fj-chat-window {
     position: fixed;
     bottom: 100px;
@@ -79,7 +76,7 @@
     opacity: 1;
 }
 
-/* ─── HEADER ─── */
+/* Cabeçalho */
 #fj-chat-header {
     background: linear-gradient(135deg, #0f0f14, #1a1a24);
     border-bottom: 1px solid var(--c-border);
@@ -142,7 +139,7 @@
 #fj-clear-btn:hover { background: rgba(255,255,255,0.06); color: var(--c-text2); }
 #fj-clear-btn svg { width: 14px; height: 14px; }
 
-/* ─── MENSAGENS ─── */
+/* Mensagens */
 #fj-chat-messages {
     flex: 1;
     padding: 18px 16px;
@@ -204,7 +201,7 @@
     font-weight: 500;
 }
 
-/* Typing indicator */
+/* Indicador de digitação */
 .fj-typing {
     display: flex;
     align-items: center;
@@ -230,7 +227,7 @@
     30%          { transform: translateY(-6px); background: var(--c-orange); }
 }
 
-/* ─── INPUT ─── */
+/* Campo de entrada */
 #fj-chat-input {
     display: flex;
     align-items: center;
@@ -273,7 +270,7 @@
 #fj-send-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 #fj-send-btn svg { width: 17px; height: 17px; }
 
-/* ─── DIVISOR DE DATA ─── */
+/* Divisor de data */
 .fj-date-sep {
     text-align: center;
     font-size: 0.62rem;
@@ -284,7 +281,7 @@
 }
 </style>
 
-<!-- ─── ROOT (isolamento de variáveis) ─── -->
+<!-- Raiz do widget -->
 <div id="fj-chat-root">
 
     <!-- Botão flutuante -->
@@ -297,7 +294,7 @@
     <!-- Janela do chat -->
     <div id="fj-chat-window">
 
-        <!-- Header -->
+        <!-- Cabeçalho -->
         <div id="fj-chat-header">
             <div class="fj-header-avatar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -322,7 +319,7 @@
         <!-- Mensagens -->
         <div id="fj-chat-messages" role="log" aria-live="polite"></div>
 
-        <!-- Input -->
+        <!-- Campo de entrada -->
         <div id="fj-chat-input">
             <input type="text" id="fj-message" placeholder="Pergunte sobre finanças..." autocomplete="off" maxlength="500" aria-label="Digite sua mensagem">
             <button id="fj-send-btn" title="Enviar">
@@ -341,28 +338,11 @@
 if (!window.chatWidgetInitialized) {
     window.chatWidgetInitialized = true;
 
-    /* ─── REFERÊNCIAS ─── */
+    /* Referências */
     let perfilCognitivo = null;
     const HISTORY_KEY = "chatHistory";
-    // O StateManager real é um módulo ES (export const StateManager em
-    // gerenciadorEstado.js) e nunca fica disponível em window — então
-    // "window.StateManager" aqui sempre foi undefined.
-    //
-    // Antes, a solução era ler direto do localStorage. Isso resolvia o
-    // "undefined", mas criava um problema mais sutil: esse script roda
-    // assim que o navegador chega nele no HTML, independente do
-    // await UIManager.init() do gastos.js (que é quem busca a renda
-    // real no servidor e regrava o localStorage). Se o usuário abrisse
-    // o chat e mandasse uma mensagem antes desse fetch terminar — ou
-    // logo após salvar a renda, numa janela de alguns milissegundos —
-    // o chat podia responder com base num localStorage desatualizado,
-    // mesmo com o valor certo já salvo no banco.
-    //
-    // Agora o chat busca renda e gastos direto do servidor a cada
-    // mensagem enviada, do mesmo jeito que já fazia com o perfil
-    // cognitivo logo abaixo — é a mesma fonte de verdade que o
-    // dashboard usa, sem depender de o localStorage estar em dia.
-    const ESTADO_STORAGE_KEY = "financas-gastos-v4"; // igual a CONFIG.STORAGE_KEY
+    // Renda e gastos são buscados no servidor a cada mensagem, sem depender do localStorage
+    const ESTADO_STORAGE_KEY = "financas-gastos-v4"; // Mesma chave de CONFIG.STORAGE_KEY
 
     async function buscarEstadoFinanceiro() {
         try {
@@ -385,10 +365,7 @@ if (!window.chatWidgetInitialized) {
             return { renda, gastos };
 
         } catch (err) {
-            // Sem conexão com o servidor: cai pro localStorage como
-            // último recurso, pra o chat ainda responder algo em vez
-            // de travar. Prefere um contexto levemente desatualizado
-            // a nenhum contexto.
+            // Sem conexão com o servidor, usa o localStorage como alternativa
             return lerEstadoFinanceiroLocal();
         }
     }
@@ -407,17 +384,11 @@ if (!window.chatWidgetInitialized) {
         }
     }
 
-    // Usa o mesmo host que serviu a página (não "localhost" fixo),
-    // assim o chat funciona também quando acessado por outra máquina/rede.
-    // Se precisar de uma URL diferente (ex: domínio de produção), defina
-    // window.CHAT_API_URL antes deste script.
+    // URL da API do chat; pode ser sobrescrita definindo window.CHAT_API_URL antes deste script
     const CHAT_API_URL = window.CHAT_API_URL
         || `${location.protocol}//${location.hostname}:3000/chat`;
 
-    // Busca o perfil cognitivo real do usuário (mesmo endpoint que o
-    // motorDicas.js usa). Antes isso vinha de localStorage.getItem
-    // ("perfilCognitivo"), mas nada no sistema grava essa chave — então
-    // a personalização por viés comportamental nunca era usada de fato.
+    // Busca o perfil cognitivo do usuário (mesmo endpoint do motorDicas.js)
     async function carregarPerfilCognitivo() {
         try {
             const resp = await fetch("../php/buscar_perfil_cognitivo.php", {
@@ -427,15 +398,12 @@ if (!window.chatWidgetInitialized) {
             const json = await resp.json();
             if (json.success) perfilCognitivo = json.perfil ?? null;
         } catch (err) {
-            // Sem perfil disponível não é erro fatal — o chat funciona sem ele.
+            // Sem perfil, o chat funciona normalmente
         }
     }
     carregarPerfilCognitivo();
 
-    // Histórico anual (totais por mês) — o localStorage só guarda o mês
-    // atual, então isso precisa vir do servidor. Busca uma vez, quando o
-    // chat carrega, e reaproveita — não precisa buscar de novo a cada
-    // mensagem enviada.
+    // Busca o histórico anual (totais por mês) uma única vez, ao carregar o chat
     let historicoAnual = null;
     let historicoAno   = new Date().getFullYear();
 
@@ -448,17 +416,12 @@ if (!window.chatWidgetInitialized) {
             const json = await resp.json();
             if (json.success) historicoAnual = json.dados_anuais ?? null;
         } catch (err) {
-            // Sem histórico disponível não é erro fatal — o chat funciona sem ele.
+            // Sem histórico, o chat funciona normalmente
         }
     }
     carregarHistorico();
 
-    // Distribuição por categoria dos últimos meses (o mês atual já vem
-    // do localStorage via "gastos" — aqui é só o que falta: os meses
-    // ANTERIORES). get_historico.php no modo mensal (?ano=X&mes=Y) devolve
-    // a lista completa de gastos daquele mês, com categoria incluída —
-    // igual ao que get_gastos.php devolve para o mês atual. Busca os
-    // últimos 3 meses fechados em paralelo, uma vez, quando o chat abre.
+    // Busca a distribuição por categoria dos 3 últimos meses fechados, em paralelo, ao abrir o chat
     const QTD_MESES_CATEGORIA_HISTORICO = 3;
     let historicoCategoriasPorMes = [];
 
@@ -511,7 +474,7 @@ if (!window.chatWidgetInitialized) {
 
     let isSending = false;
 
-    /* ─── HISTÓRICO ─── */
+    /* Histórico */
     function loadHistory() {
         chatMessages.innerHTML = "";
         let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
@@ -536,7 +499,7 @@ if (!window.chatWidgetInitialized) {
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
 
-    /* ─── RENDERIZAR MENSAGEM ─── */
+    /* Renderização de mensagens */
     function addMessage(text, isUser = false, animate = true) {
         const msg = document.createElement("div");
         msg.className = `fj-msg ${isUser ? "fj-user" : "fj-bot"}`;
@@ -554,7 +517,7 @@ if (!window.chatWidgetInitialized) {
         return msg;
     }
 
-    /* ─── TYPING INDICATOR ─── */
+    /* Indicador de digitação */
     function showTyping() {
         const t = document.createElement("div");
         t.className = "fj-typing";
@@ -565,7 +528,7 @@ if (!window.chatWidgetInitialized) {
         return t;
     }
 
-    /* ─── ENVIAR MENSAGEM ─── */
+    /* Envio de mensagem */
     async function sendMessage(auto = null) {
         if (isSending) return;
         const message = (auto || input.value || "").trim();
@@ -633,7 +596,7 @@ if (!window.chatWidgetInitialized) {
         }
     }
 
-    /* ─── ABRIR / FECHAR ─── */
+    /* Abrir e fechar */
     toggleBtn.addEventListener("click", () => {
         const isOpen = chatWindow.classList.contains("fj-open");
 
@@ -654,7 +617,7 @@ if (!window.chatWidgetInitialized) {
         }
     });
 
-    /* ─── EVENTOS ─── */
+    /* Eventos */
     sendBtn.addEventListener("click", () => sendMessage());
     input.addEventListener("keypress", e => { if (e.key === "Enter" && !e.shiftKey) sendMessage(); });
 
@@ -665,7 +628,7 @@ if (!window.chatWidgetInitialized) {
         }
     });
 
-    /* ─── INICIALIZA ─── */
+    /* Inicialização */
     loadHistory();
 }
 </script>

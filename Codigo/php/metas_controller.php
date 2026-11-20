@@ -1,21 +1,13 @@
 <?php
-/* ================================================================
-   metas_controller.php — Finanças Já
-
-   ⚠️ IMPORTANTE SOBRE O BANCO: este arquivo agora grava o status
-   'falhou' na coluna `status` da tabela `metas` (além dos já
-   existentes 'ativa' e 'concluida'). Se essa coluna for um ENUM,
-   confirme que 'falhou' está na lista de valores permitidos —
-   senão o UPDATE vai falhar. Se for VARCHAR, não precisa mudar nada.
-================================================================ */
+/* metas_controller.php
+   Grava o status 'falhou' na tabela `metas`. Se a coluna `status` for ENUM,
+   inclua 'falhou' nos valores permitidos. */
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* Nunca mostrar erro do PHP direto na resposta — isso corrompe o
-   JSON (o navegador recebe HTML de aviso + JSON grudados e o
-   res.json() quebra no frontend). Os erros continuam indo pro log. */
+/* Não exibe erros do PHP na resposta (corromperiam o JSON); eles continuam indo para o log */
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 error_reporting(E_ALL);
@@ -23,9 +15,7 @@ error_reporting(E_ALL);
 while (ob_get_level()) ob_end_clean();
 ob_start();
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload): void
 {
     while (ob_get_level()) ob_end_clean();
@@ -39,10 +29,7 @@ function responder(?mysqli $conn, int $status, array $payload): void
     exit;
 }
 
-/* ================================================================
-   Função auxiliar: prepare() que already valida a si mesmo.
-   Evita repetir "if ($stmt === false) throw ..." umas 15 vezes.
-================================================================ */
+/* prepare() que já valida o resultado, evitando repetir a checagem de erro */
 function prep(mysqli $conn, string $sql): mysqli_stmt
 {
     $stmt = $conn->prepare($sql);
@@ -52,9 +39,7 @@ function prep(mysqli $conn, string $sql): mysqli_stmt
     return $stmt;
 }
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -71,9 +56,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -82,9 +65,7 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Não autenticado']);
 }
 
-/* ================================================================
-   3) Entrada
-================================================================ */
+/* 3) Entrada */
 $input = $_SERVER['REQUEST_METHOD'] === 'POST'
     ? (json_decode(file_get_contents('php://input'), true) ?? [])
     : $_GET;
@@ -93,27 +74,10 @@ if (!is_array($input)) $input = [];
 
 $acao = $input['acao'] ?? '';
 
-/* ================================================================
-   FECHAMENTO AUTOMÁTICO DO MÊS ANTERIOR
-   ================================================================
-   Fecha (marca concluída ou falhou) as metas de meses já
-   terminados que ainda estejam 'ativa'.
-
-   Correções desta versão:
-   a) A renda usada para calcular o saldo agora é a renda DAQUELE
-      mês específico (data_receita dentro do período sendo fechado)
-      — não mais "a renda mais recente cadastrada no sistema".
-      Esse era o bug: cadastrar a renda de fevereiro mudava
-      retroativamente o resultado das metas de janeiro.
-   b) Toda meta processada aqui sai com um status definitivo
-      ('concluida' ou 'falhou') — nunca mais fica 'ativa' pra
-      sempre sendo reavaliada a cada carregamento de página com
-      dados que podem ter mudado.
-   c) Apostas de metas que falham agora são marcadas 'perdeu' em
-      vez de ficarem 'pendente' pra sempre.
-   d) A soma de gastos agora filtra "status = 'ativo'", igual ao
-      resto do sistema (get_gastos.php, get_historico.php, etc).
-================================================================ */
+/* Fechamento automático do mês anterior
+   Marca como 'concluida' ou 'falhou' as metas ativas de meses já encerrados.
+   Usa a renda do próprio mês fechado e soma apenas gastos com status 'ativo'.
+   Apostas de metas que falham passam a 'perdeu'. */
 function autoFecharMesPassado(mysqli $conn, int $id_usuario): ?array
 {
     $hoje = date('Y-m-d');
@@ -139,14 +103,14 @@ function autoFecharMesPassado(mysqli $conn, int $id_usuario): ?array
     $primeiroDia = $periodo . '-01';
     $proximoMes  = date('Y-m-01', strtotime($primeiroDia . ' +1 month'));
 
-    /* Renda DAQUELE mês — não a mais recente do sistema (era o bug) */
+    /* Renda do próprio mês que está sendo fechado */
     $stmt = prep($conn, "SELECT valor FROM receitas WHERE id_usuario = ? AND descricao = 'Renda Mensal' AND data_receita >= ? AND data_receita < ? ORDER BY data_receita DESC, id_receita DESC LIMIT 1");
     $stmt->bind_param('iss', $id_usuario, $primeiroDia, $proximoMes);
     $stmt->execute();
     $renda = (float) ($stmt->get_result()->fetch_assoc()['valor'] ?? 0);
     $stmt->close();
 
-    /* Gastos DAQUELE mês, só os ativos (mesmo filtro do resto do sistema) */
+    /* Gastos ativos do mês fechado */
     $stmt = prep($conn, "SELECT COALESCE(SUM(valor), 0) as total FROM gastos WHERE id_usuario = ? AND data_gasto >= ? AND data_gasto < ? AND status = 'ativo'");
     $stmt->bind_param('iss', $id_usuario, $primeiroDia, $proximoMes);
     $stmt->execute();
@@ -172,7 +136,7 @@ function autoFecharMesPassado(mysqli $conn, int $id_usuario): ?array
 
         if ($necessario <= 0 || $saldoRestante >= $necessario) {
 
-            /* --- Meta concluída --- */
+            /* Meta concluída */
             $saldoRestante -= max(0, $necessario);
 
             $upd = prep($conn, "UPDATE metas SET valor_atual = ?, status = 'concluida' WHERE id_meta = ?");
@@ -205,9 +169,7 @@ function autoFecharMesPassado(mysqli $conn, int $id_usuario): ?array
 
         } else {
 
-            /* --- Meta falhou: recebe o que sobrou de saldo (se algum),
-                 mas o status vira definitivo, nunca mais fica "ativa"
-                 pendurada pra ser reavaliada com dados de outro mês --- */
+            /* Meta falhou: recebe o saldo restante (se houver) e o status vira definitivo, sem voltar a ficar "ativa" */
             $novoAtual     = (float) $meta['valor_atual'] + $saldoRestante;
             $faltandoAgora = $necessario - $saldoRestante;
 
@@ -257,16 +219,12 @@ function autoFecharMesPassado(mysqli $conn, int $id_usuario): ?array
     ];
 }
 
-/* ================================================================
-   4) Ações
-================================================================ */
+/* 4) Ações */
 try {
 
 switch ($acao) {
 
-    /* ============================================================
-       PONTOS ATUAIS
-    ============================================================ */
+    /* Pontos atuais */
     case 'get_pontos_atual':
         $stmt = prep($conn, "SELECT COALESCE(SUM(pontos), 0) as pontos FROM historico_pontos WHERE id_usuario = ?");
         $stmt->bind_param("i", $id_usuario);
@@ -276,9 +234,7 @@ switch ($acao) {
 
         responder($conn, 200, ['success' => true, 'pontos' => (int) ($result['pontos'] ?? 0)]);
 
-    /* ============================================================
-       CRIAR META
-    ============================================================ */
+    /* Criar meta */
     case 'criar':
         $titulo     = mb_substr(trim((string) ($input['titulo'] ?? '')), 0, 150);
         $valor_meta = isset($input['valor_meta']) ? (float) $input['valor_meta'] : 0.0;
@@ -324,9 +280,7 @@ switch ($acao) {
 
         responder($conn, 200, ['success' => true, 'aposta' => $aposta]);
 
-    /* ============================================================
-       DELETAR META
-    ============================================================ */
+    /* Excluir meta */
     case 'deletar':
         $id_meta = isset($input['id_meta']) ? intval($input['id_meta']) : 0;
 
@@ -351,9 +305,7 @@ switch ($acao) {
 
         responder($conn, 200, ['success' => true]);
 
-    /* ============================================================
-       LISTAR METAS DO MÊS ATUAL
-    ============================================================ */
+    /* Listar metas do mês atual */
     case 'listar':
         $fechamento  = autoFecharMesPassado($conn, $id_usuario);
         $primeiroDia = date('Y-m-01');
@@ -367,9 +319,7 @@ switch ($acao) {
 
         responder($conn, 200, ['success' => true, 'metas' => $metas, 'fechamento_automatico' => $fechamento]);
 
-    /* ============================================================
-       RESUMO FINANCEIRO DO MÊS ATUAL
-    ============================================================ */
+    /* Resumo financeiro do mês atual */
     case 'resumo_mes':
         $fechamento  = autoFecharMesPassado($conn, $id_usuario);
         $primeiroDia = date('Y-m-01');
@@ -404,9 +354,7 @@ switch ($acao) {
             'fechamento_automatico' => $fechamento
         ]);
 
-    /* ============================================================
-       AÇÃO INVÁLIDA
-    ============================================================ */
+    /* Ação inválida */
     default:
         responder($conn, 400, ['success' => false, 'message' => 'Ação inválida']);
 }

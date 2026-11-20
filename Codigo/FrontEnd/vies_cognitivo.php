@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-// ==================== VARIÁVEIS DO HEADER PADRONIZADO ====================
+// Variáveis do cabeçalho
 $page_title = 'Análise de Viés Cognitivo';
 $show_export_button = false;
 
-// ==================== LÓGICA DO TESTE ====================
+// Lógica do teste
 $mostrar = $_GET['teste'] ?? 'intro';
 
 $vieses = [
@@ -29,21 +29,12 @@ $dicas = [
     'vies_emocional'   => 'Evite decisões no calor do momento. Implemente a regra das 24 horas antes de qualquer mudança de posição.'
 ];
 
-/* ================================================================
-   CATEGORIAS (NICHOS)
-   ================================================================
-   Ideia do orientador: em vez de uma única bateria de perguntas
-   genérica sobre "mercado financeiro", cada categoria contextualiza
-   as MESMAS 4 tendências cognitivas dentro de um cenário diferente
-   (investimentos, viagem, etc). Para acrescentar uma categoria nova
-   no futuro basta:
-     1) Adicionar uma entrada aqui em $categorias;
-     2) Adicionar as opções da triagem que apontam pra ela em
-        $perguntas_triagem;
-     3) Adicionar as 8 perguntas contextualizadas em
-        $perguntas_categoria.
-   Nada mais no resto do arquivo precisa mudar.
-================================================================ */
+/*
+   Categorias (nichos)
+   Cada categoria contextualiza as mesmas 4 tendências cognitivas em um cenário diferente.
+   Para adicionar uma categoria: incluir em $categorias, em $perguntas_triagem
+   e as 8 perguntas em $perguntas_categoria.
+*/
 $categorias = [
     'investidor' => [
         'nome'      => 'Investidor',
@@ -71,7 +62,7 @@ $categorias = [
     ],
 ];
 
-/* Perguntas rápidas da triagem: cada opção aponta para uma categoria. */
+/* Perguntas rápidas da triagem: cada opção aponta para uma categoria */
 $perguntas_triagem = [
     ['pergunta' => 'Quando você pensa em usar uma reserva financeira extra, o que vem primeiro à cabeça?', 'opcoes' => [
         'investidor' => 'Onde investir esse dinheiro pra ele render mais.',
@@ -105,16 +96,11 @@ $perguntas_triagem = [
     ]],
 ];
 
-/* ================================================================
-   Perguntas principais, contextualizadas por categoria.
-   ================================================================
-   As opções evitam nomear o mecanismo por trás delas (nada de
-   "confio demais" ou "sigo a manada" escrito literalmente) -
-   descrevem uma reação concreta e deixam o viés implícito, pra não
-   parecer um teste psicológico óbvio. A chave de cada opção
-   ('aversao_perda', 'efeito_manada' etc.) é o que conta pra
-   pontuação; o texto exibido é só a "casca" natural da resposta.
-================================================================ */
+/*
+   Perguntas principais por categoria.
+   A chave de cada opção (ex.: 'aversao_perda') define a pontuação;
+   o texto exibido não nomeia o viés.
+*/
 $perguntas_categoria = [
     'investidor' => [
         ['pergunta' => 'Após uma queda relevante no mercado, qual ação você tende a considerar primeiro?', 'opcoes' => [
@@ -318,13 +304,7 @@ $perguntas_categoria = [
     ],
 ];
 
-/* ================================================================
-   Classificação de nível a partir do percentual do viés dominante.
-   Com 8 perguntas de 4 opções, o "empate técnico" entre os vieses
-   fica perto de 25%. O corte de "Alto" fica bem acima dessa base
-   estatística, pra não marcar como "Alto" um resultado que só
-   ganhou por pouco.
-================================================================ */
+/* Nível do viés dominante: "Alto" a partir de 50% e "Médio" a partir de 25% */
 function nivel_por_percentual(float $percentual): string
 {
     return match(true) {
@@ -334,14 +314,7 @@ function nivel_por_percentual(float $percentual): string
     };
 }
 
-/* ================================================================
-   Ranking dos vieses pela contagem REAL de respostas.
-   ================================================================
-   O ranking nunca usa os percentuais arredondados (o arredondamento
-   pode criar ou desfazer empates). Em caso de empate de respostas,
-   vale a ordem fixa definida em $ordemDesempate (a mesma ordem de
-   $vieses), então o resultado é sempre determinístico.
-================================================================ */
+/* Ranking dos vieses pela contagem real de respostas. Em empate, vale a ordem de $ordemDesempate */
 function ranquear_vieses(array $scores, array $ordemDesempate): array
 {
     $original = $scores;
@@ -370,24 +343,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Sem nenhuma resposta válida não há o que apurar (e todas as
-        // categorias ficariam "empatadas" com 0 votos).
+        // Sem respostas válidas, não há o que apurar
         if ($totalRespondidas === 0) {
             header("Location: ?teste=triagem");
             exit;
         }
 
-        // DESEMPATE: pega TODAS as categorias que chegaram à maior
-        // contagem de votos, na ordem em que aparecem em $categorias.
-        // Se houver mais de uma, a tela de resultado mostra as opções
-        // empatadas e deixa o próprio usuário escolher qual seguir.
+        // Categorias empatadas no topo, na ordem de $categorias; havendo empate, o usuário escolhe qual seguir
         $maiorVoto           = max($scoresCat);
         $categoriasEmpatadas = array_keys(array_filter($scoresCat, fn(int $v): bool => $v === $maiorVoto));
         $empate              = count($categoriasEmpatadas) > 1;
 
-        // Ordena por número de votos (do maior pro menor) sem perder a
-        // contagem original de cada categoria - ela é reaproveitada
-        // logo abaixo pra montar o placar completo e medir a margem.
+        // Ordena por votos (maior primeiro), mantendo a contagem original
         $scoresOrdenados = $scoresCat;
         arsort($scoresOrdenados);
         $categoriasOrdenadas  = array_keys($scoresOrdenados);
@@ -395,11 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $votosVencedor        = $maiorVoto;
         $votosSegundoColocado = $scoresOrdenados[$categoriasOrdenadas[1]] ?? 0;
 
-        // Diferença de votos entre o 1º e o 2º colocado. Com 5 perguntas
-        // e 4 categorias, um resultado tipo "2 votos a 1" (margem = 1)
-        // venceu por pouco - o resultado_triagem usa isso pra avisar o
-        // usuário que a triagem não foi muito conclusiva. Em caso de
-        // empate a margem é 0.
+        // Margem de votos entre o 1º e o 2º colocado (0 em caso de empate)
         $margem = $votosVencedor - $votosSegundoColocado;
 
         $percentualCat = round(($votosVencedor / $totalRespondidas) * 100);
@@ -409,7 +372,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'empate'       => $empate,
             'empatadas'    => $categoriasEmpatadas,
             'percentual'   => $percentualCat,
-            'distribuicao' => $scoresCat, // votos por categoria, pra exibir o placar completo
+            'distribuicao' => $scoresCat, // votos por categoria, para o placar
             'margem'       => $margem,
             'total'        => $totalRespondidas,
         ];
@@ -420,9 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $categoriaSelecionada = $_POST['categoria'] ?? '';
 
-        // Sem essa validação, um valor manipulado no POST derruba a
-        // tela de perguntas mais na frente (ela acessa
-        // $perguntas_categoria[$categoriaSelecionada] sem checar).
+        // Valida a categoria recebida via POST
         if (!array_key_exists($categoriaSelecionada, $categorias)) {
             header("Location: ?teste=triagem");
             exit;
@@ -443,17 +404,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Percentuais apenas para exibição. Cada um é arredondado de
-        // forma independente e NÃO é "ajustado" para somar 100%: esse
-        // ajuste antigo podia tirar pontos de um viés empatado e fazer
-        // um empate real parecer vitória isolada de outro viés.
+        // Percentuais apenas para exibição, arredondados individualmente
         $percentuais = [];
         foreach ($scores as $k => $v) {
             $percentuais[$k] = (int) round(($v / $total) * 100);
         }
 
-        // Ranking pela contagem real de respostas; empates seguem a
-        // ordem fixa de $vieses (ver ranquear_vieses).
+        // Ranking pela contagem real de respostas; empates seguem a ordem de $vieses
         $ranking = ranquear_vieses($scores, array_keys($vieses));
         $top     = array_slice($ranking, 0, 3);
 
@@ -486,7 +443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
-        /* ═══ TOKENS ═══ */
+        /* Variáveis */
         :root {
             --bg:          #07070a;
             --bg2:         #0e0e12;
@@ -527,7 +484,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .container { position: relative; z-index: 1; }
 
-        /* ═══ TIPOGRAFIA ═══ */
+        /* Tipografia */
         h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
 
         .eyebrow {
@@ -550,7 +507,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             -webkit-text-fill-color: transparent;
         }
 
-        /* ═══ UTILITÁRIOS ═══ */
+        /* Utilitários */
         .glass {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -559,7 +516,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .divider { height: 1px; background: var(--border); margin: 40px 0; }
 
-        /* ═══ BOTÕES ═══ */
+        /* Botões */
         .btn-cta,
         .btn-cta:link,
         .btn-cta:visited,
@@ -601,7 +558,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-cta.full,
         button.btn-cta.full { width: 100% !important; }
 
-        /* Garante que ícones dentro do botão não herdem cor estranha */
+        /* Ícones herdam a cor do botão */
         .btn-cta i,
         .btn-cta svg {
             color: #000000 !important;
@@ -644,7 +601,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .btn-link-dim:hover { color: var(--text2); }
 
-        /* ═══ CARDS INTRO ═══ */
+        /* Cards da introdução */
         .bias-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -676,7 +633,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flex-shrink: 0;
         }
 
-        /* ═══ CARD DE DESEMPATE (escolha da categoria) ═══ */
+        /* Card de desempate */
         .tie-card {
             display: flex;
             flex-direction: column;
@@ -687,7 +644,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .tie-card::after { opacity: 1; }
         .tie-card .btn-cta { margin-top: auto; }
 
-        /* ═══ FORMULÁRIO ═══ */
+        /* Formulário */
         .q-block {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -737,7 +694,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .radio-opt label { color: var(--text2); font-size: 0.9rem; line-height: 1.5; cursor: pointer; transition: color 0.2s; }
         .radio-opt:has(input:checked) label { color: var(--text); }
 
-        /* ═══ PROGRESS ═══ */
+        /* Progresso */
         .progress-track {
             height: 3px;
             background: var(--surface2);
@@ -754,7 +711,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 10px var(--orange-glow);
         }
 
-        /* ═══ TOP 3 ═══ */
+        /* Top 3 */
         .rank-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -785,7 +742,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .rank-bar-track { height: 4px; background: var(--border2); border-radius: 10px; overflow: hidden; margin-top: 12px; }
         .rank-bar-fill  { height: 100%; border-radius: 10px; }
 
-        /* ═══ DONUT CENTER ═══ */
+        /* Centro do gráfico de rosca */
         .donut-center {
             position: absolute;
             inset: 0;
@@ -798,7 +755,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 0 16px;
         }
 
-        /* ═══ RANGE ═══ */
+        /* Controle deslizante */
         .range-wrap input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -827,7 +784,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
         }
 
-        /* ═══ RESULTADO FINAL ═══ */
+        /* Resultado final */
         .score-ring {
             width: 148px; height: 148px;
             border-radius: 50%;
@@ -838,7 +795,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative;
             gap: 2px;
         }
-        /* anel externo com glow */
+        /* Anel externo */
         .score-ring::before {
             content: '';
             position: absolute;
@@ -857,7 +814,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             filter: blur(20px);
         }
 
-        /* Resumo clínico (report card) */
+        /* Resumo do resultado */
         .report-card {
             background: linear-gradient(135deg, var(--surface2), var(--surface));
             border: 1px solid var(--border2);
@@ -899,7 +856,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 22px;
         }
 
-        /* ═══ MODAL ═══ */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -942,7 +899,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .modal-close-btn:hover { background: var(--border2); color: var(--text); }
 
-        /* ═══ ANIMAÇÕES ═══ */
+        /* Animações */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(22px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -969,7 +926,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php include_once 'layouts/header.php'; ?>
 
-    <!-- ═══ MODAL GLOBAL ═══ -->
+    <!-- Modal global -->
     <div class="modal-overlay" id="viesModal" onclick="handleOverlayClick(event)">
         <div class="modal-box">
             <button class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times fa-sm"></i></button>
@@ -987,9 +944,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'vies_emocional'   => ['cor'=>'#10b981', 'icon'=>'fa-heart-pulse'],
     ];
 
-    // Total de perguntas da tela atual, usado pela barra de progresso no
-    // rodapé (cada etapa - triagem ou perguntas da categoria - tem um
-    // número de perguntas diferente).
+    // Total de perguntas da tela atual, usado na barra de progresso
     $progressoTotal = 8;
     if ($mostrar === 'triagem') {
         $progressoTotal = count($perguntas_triagem);
@@ -998,7 +953,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     ?>
 
-    <!-- ══════════════════ INTRO ══════════════════ -->
+    <!-- Introdução -->
     <?php if ($mostrar === 'intro'): ?>
 
         <div class="text-center mb-5 mt-4 anim">
@@ -1037,7 +992,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endforeach; ?>
         </div>
 
-    <!-- ══════════════════ TRIAGEM ══════════════════ -->
+    <!-- Triagem -->
     <?php elseif ($mostrar === 'triagem'): ?>
 
         <div style="max-width:700px;margin:0 auto;">
@@ -1074,23 +1029,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
-    <!-- ══════════════════ RESULTADO DA TRIAGEM ══════════════════ -->
+    <!-- Resultado da triagem -->
     <?php elseif ($mostrar === 'resultado_triagem' && isset($_SESSION['categoria_sugerida'])): ?>
         <?php
         $sugestao = $_SESSION['categoria_sugerida'];
         $catKey   = $sugestao['categoria'];
         $catInfo  = $categorias[$catKey] ?? null;
 
-        // Se a categoria salva na sessão não existir mais em $categorias,
-        // manda de volta pra triagem em vez de quebrar a página.
+        // Se a categoria salva não existir mais, volta para a triagem
         if ($catInfo === null) {
             header("Location: ?teste=triagem");
             exit;
         }
 
-        // Categorias que ficaram empatadas no topo (só as que ainda
-        // existem em $categorias). Com 2 ou mais, a tela vira uma
-        // escolha: o usuário decide qual cenário quer seguir.
+        // Categorias empatadas no topo; com 2 ou mais, o usuário escolhe qual seguir
         $empatadas = array_values(array_filter(
             $sugestao['empatadas'] ?? [$catKey],
             fn($k): bool => isset($categorias[$k])
@@ -1218,14 +1170,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php endif; ?>
 
-    <!-- ══════════════════ PERGUNTAS DA CATEGORIA ══════════════════ -->
+    <!-- Perguntas da categoria -->
     <?php elseif ($mostrar === 'perguntas' && isset($_GET['categoria'])): ?>
         <?php
         $categoriaAtual = $_GET['categoria'];
 
-        // Mesmo cuidado do antigo teste "específico": sem validar contra a
-        // whitelist de categorias, um valor manipulado na URL quebra o
-        // foreach abaixo e derruba a página com erro fatal cru.
+        // Valida a categoria da URL antes de usar
         if (!array_key_exists($categoriaAtual, $categorias)) {
             header("Location: ?teste=triagem");
             exit;
@@ -1267,7 +1217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
-    <!-- ══════════════════ RESULTADO FINAL ══════════════════ -->
+    <!-- Resultado final -->
     <?php elseif ($mostrar === 'resultado_geral' && isset($_SESSION['resultado_geral'])): ?>
         <?php
         $r       = $_SESSION['resultado_geral'];
@@ -1277,9 +1227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data_ch   = [];
         foreach (array_keys($vieses) as $k) $data_ch[] = $r['scores'][$k] ?? 0;
 
-        // Reaproveita o ranking já calculado no POST (dominante/secundario/
-        // terciario) em vez de reordenar $scores de novo aqui - evita
-        // manter a mesma lógica de ranking escrita em dois lugares.
+        // Reaproveita o ranking calculado no POST
         $top3      = array_values(array_filter([$r['dominante'], $r['secundario'] ?? null, $r['terciario'] ?? null]));
         $opacities = [1, 0.75, 0.55];
 
@@ -1296,10 +1244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         $cor = $nivel_cores[$nivelDominante];
 
-        // Se o 2º colocado ficou bem perto do dominante (diferença de até
-        // 1 pergunta, ~12,5% do teste), o resultado não é tão categórico
-        // quanto o "● Dominante" sozinho sugere - isso vira um aviso mais
-        // abaixo, perto do anel de score.
+        // Aviso quando o 2º colocado está a até 1 pergunta de distância do dominante
         $percentualSecundario = ($r['secundario'] ?? null) !== null ? ($r['scores'][$r['secundario']] ?? 0) : 0;
         $margemFinalApertada  = ($r['secundario'] ?? null) !== null && ($percentualDominante - $percentualSecundario) <= 13;
         ?>
@@ -1323,7 +1268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="row g-4 align-items-start mb-4">
-            <!-- TOP 3 -->
+            <!-- Top 3 -->
             <div class="col-lg-7 anim d1">
                 <p class="eyebrow mb-3">Top 3 Vieses Identificados</p>
                 <?php foreach ($top3 as $idx => $key):
@@ -1361,7 +1306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endforeach; ?>
             </div>
 
-            <!-- GRAFICO -->
+            <!-- Gráfico -->
             <div class="col-lg-5 anim d2">
                 <div class="glass p-4 text-center mb-3">
                     <p class="eyebrow mb-3" style="color:var(--text3);">Distribuição dos Vieses</p>
@@ -1400,7 +1345,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
-        <!-- ─── SCORE + RADAR + DICA ─── -->
+        <!-- Pontuação, radar e dica -->
         <div class="row g-4">
             <div class="col-lg-4 anim d2">
                 <div class="glass p-4 text-center h-100 d-flex flex-column align-items-center justify-content-center">
@@ -1439,7 +1384,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="divider"></div>
 
-        <!-- Botoes -->
+        <!-- Botões -->
         <div class="d-flex gap-3 justify-content-center flex-wrap no-print">
             <button onclick="window.print()" class="btn-outline-custom">
                 <i class="fas fa-file-pdf" style="color:var(--orange);"></i> Exportar Relatório
@@ -1510,7 +1455,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
 
-    <!-- FOOTER -->
+    <!-- Rodapé -->
     <footer class="text-center py-5 mt-5 no-print" style="border-top:1px solid var(--border);">
         <p style="color:var(--text3);font-size:0.75rem;margin-bottom:4px;">InvestMind | Behavior Analysis © 2026</p>
         <p style="color:var(--text3);font-size:0.65rem;opacity:0.55;">Baseado na Teoria da Perspectiva (Kahneman & Tversky) e Heurísticas de Julgamento.</p>
@@ -1518,7 +1463,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    /* ═══ DADOS DOS VIESES ═══ */
+    /* Dados dos vieses */
     const VIES = {
         aversao_perda: {
             titulo:'Aversão à Perda', origem:'Kahneman & Tversky, 1979', cor:'#ef4444', icon:'fa-shield-halved',
@@ -1546,7 +1491,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     };
 
-    /* ═══ MODAL ═══ */
+    /* Modal */
     function openViesModal(key) {
         const d = VIES[key]; if (!d) return;
         const sinaisHTML = d.sinais.map(s => `
@@ -1593,7 +1538,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    /* ═══ PROGRESS BAR ═══ */
+    /* Barra de progresso */
     document.querySelectorAll('input[type="radio"]').forEach(r => {
         r.addEventListener('change', () => {
             const checked = document.querySelectorAll('input[type="radio"]:checked').length;
@@ -1602,21 +1547,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     });
 
-    /* ═══ ÁREA CLIQUÉVEL DAS OPÇÕES ═══
-       O .radio-opt é uma <div>, não um <label> — nativamente só o
-       input e o texto do label respondem a clique. O CSS dá
-       cursor:pointer na caixa inteira, então visualmente parece
-       tudo clicável, mas clicar no padding ao redor não marcava
-       nada (por isso às vezes precisava clicar duas vezes). */
+    /* Torna toda a caixa da opção clicável, não só o input e o texto */
     document.querySelectorAll('.radio-opt').forEach(opt => {
         opt.addEventListener('click', (e) => {
-            if (e.target.tagName === 'INPUT') return; // clique já nativo no input
+            if (e.target.tagName === 'INPUT') return; // o input já trata o clique
             const input = opt.querySelector('input[type="radio"], input[type="checkbox"]');
             if (input && !input.disabled) input.click();
         });
     });
 
-    /* ═══ RANGE LABELS ═══ */
+    /* Rótulos do controle deslizante */
     function updateRangeVal(num, val) {
         const el = document.getElementById('rangeVal' + num);
         if (el) el.textContent = val;

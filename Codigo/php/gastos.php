@@ -1,16 +1,7 @@
 <?php
-/* ================================================================
-   gastos.php — Finanças Já
-   Arquivo: ../php/gastos.php
-
-   Recebe JSON do frontend e insere um gasto no banco.
-
-   IMPORTANTE: a data_gasto é SEMPRE gerada aqui no servidor
-   com date('Y-m-d'), ignorando qualquer data enviada pelo
-   frontend. Isso garante que o gasto sempre cai no mês atual
-   do servidor, evitando os problemas de virada de mês e
-   entradas manuais incorretas.
-================================================================ */
+/* gastos.php
+   Insere um gasto recebido em JSON. A data é sempre a de hoje no servidor,
+   ignorando qualquer data enviada pelo frontend. */
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -19,12 +10,7 @@ session_start();
 /* Tipos de gasto aceitos pelo app (o resto vira 'variavel') */
 const TIPOS_VALIDOS = ['fixo', 'variavel'];
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-   Fecha a conexão (com rollback opcional) antes de sair, para
-   nunca deixar uma transação pendurada nem duplicar o padrão
-   http_response_code + json_encode + exit pelo arquivo todo.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload, bool $rollback = false): void
 {
     if ($conn instanceof mysqli) {
@@ -39,12 +25,8 @@ function responder(?mysqli $conn, int $status, array $payload, bool $rollback = 
     exit;
 }
 
-/* ================================================================
-   Função auxiliar: busca categoria por nome ou cria uma nova.
-   Deve sempre ser chamada DENTRO da transação do chamador, para
-   que uma categoria recém-criada seja desfeita junto se o
-   restante da operação falhar.
-================================================================ */
+/* Busca a categoria por nome (sem diferenciar maiúsculas) ou cria uma nova.
+   Deve ser chamada dentro da transação do chamador. */
 function buscarOuCriarCategoria(mysqli $conn, string $nome): int
 {
     /* 1) Busca pelo nome (case-insensitive) */
@@ -78,7 +60,7 @@ function buscarOuCriarCategoria(mysqli $conn, string $nome): int
     $novo_id = intval($ins->insert_id);
     $ins->close();
 
-    /* 3) Se houve race condition (chave duplicada), busca novamente */
+    /* 3) Em caso de condição de corrida (chave duplicada), busca novamente */
     if ($novo_id === 0) {
         $stmt2 = $conn->prepare(
             "SELECT id_categoria FROM categorias WHERE LOWER(nome) = LOWER(?) LIMIT 1"
@@ -96,9 +78,7 @@ function buscarOuCriarCategoria(mysqli $conn, string $nome): int
     return $novo_id;
 }
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -115,9 +95,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -126,9 +104,7 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Usuário não autenticado']);
 }
 
-/* ================================================================
-   3) Receber e validar JSON
-================================================================ */
+/* 3) Receber e validar JSON */
 $raw   = file_get_contents('php://input');
 $dados = json_decode($raw, true);
 
@@ -144,13 +120,7 @@ $metodo_pagamento = trim((string)($dados['metodo_pagamento'] ?? ''));
 $recorrente       = !empty($dados['recorrente']) ? 1 : 0;
 $observacoes      = trim((string)($dados['observacoes']      ?? ''));
 
-/*
- * DATA GERADA PELO SERVIDOR
- * Independente do que o usuário digitou no formulário,
- * a data do gasto é sempre hoje no servidor.
- * Isso garante que o gasto seja listado no mês correto
- * tanto em get_gastos.php quanto no histórico.
- */
+/* A data do gasto é sempre a de hoje no servidor, independente do que o formulário enviar */
 $data_gasto = date('Y-m-d');
 
 /* Validações */
@@ -161,21 +131,13 @@ if ($valor <= 0) {
     responder($conn, 400, ['success' => false, 'message' => 'O valor deve ser maior que zero']);
 }
 
-/* ================================================================
-   4) Inserir gasto + resolver categoria (tudo na mesma transação)
-
-   A categoria é resolvida DEPOIS de abrir a transação: assim,
-   se o gasto acabar não sendo salvo, uma categoria nova criada
-   nessa mesma requisição é desfeita junto pelo rollback, em vez
-   de ficar órfã no banco.
-================================================================ */
+/* 4) Inserir o gasto e resolver a categoria (na mesma transação)
+   A categoria é resolvida após abrir a transação, para ser desfeita junto em caso de falha. */
 $conn->begin_transaction();
 
-/* --- Resolver categoria_id -----------------------------------
-   Prioridade:
-   a) categoria_id numérico válido existente no banco
-   b) nome em categoria_nova ou categoria → busca ou cria
------------------------------------------------------------------ */
+/* Resolver categoria_id
+   Prioridade: (a) categoria_id numérico existente no banco;
+   (b) nome em categoria_nova ou categoria (busca ou cria). */
 $categoria_id = null;
 
 if (isset($dados['categoria_id']) && ctype_digit((string)$dados['categoria_id'])) {
@@ -214,7 +176,7 @@ if (empty($categoria_id)) {
     responder($conn, 500, ['success' => false, 'message' => 'Não foi possível determinar a categoria'], true);
 }
 
-/* --- Inserir o gasto -------------------------------------------- */
+/* Inserir o gasto */
 $sql = "
     INSERT INTO gastos
         (id_usuario, categoria_id, descricao, valor, moeda, tipo,
@@ -259,5 +221,5 @@ responder($conn, 200, [
     'message'      => 'Gasto salvo com sucesso!',
     'id_gasto'     => $inserted_id,
     'categoria_id' => $categoria_id,
-    'data_gasto'   => $data_gasto       // retorna a data real usada
+    'data_gasto'   => $data_gasto       // data usada no registro
 ]);

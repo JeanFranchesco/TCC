@@ -3,9 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-// ---------- CONFIGURAÇÕES ----------
 $connPath = __DIR__ . '/../../Conexao/conn.php';
-// ------------------------------------
 
 if (!is_file($connPath)) {
     http_response_code(500);
@@ -39,9 +37,7 @@ if ($id_usuario <= 0) {
 
 try {
 
-    // ============================
-    // 1️⃣ BUSCAR PERFIL ATUAL
-    // ============================
+    // Perfil atual
 
     $perfil = null;
 
@@ -61,9 +57,7 @@ try {
 
     $stmt->close();
 
-    // ============================
-    // 2️⃣ BUSCAR HISTÓRICO
-    // ============================
+    // Histórico
 
     $historico = [];
 
@@ -83,9 +77,7 @@ try {
 
     $stmt->close();
 
-    // ============================
-    // RESPOSTA FINAL
-    // ============================
+    // Resposta
 
     echo json_encode([
         'success' => true,

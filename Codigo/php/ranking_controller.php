@@ -3,9 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload): void
 {
     if ($conn instanceof mysqli) {
@@ -25,9 +23,7 @@ function prep(mysqli $conn, string $sql): mysqli_stmt
     return $stmt;
 }
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -44,9 +40,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -55,9 +49,7 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Não autenticado']);
 }
 
-/* ================================================================
-   3) Ranking
-================================================================ */
+/* 3) Ranking */
 try {
 
     $stmt = prep($conn, "

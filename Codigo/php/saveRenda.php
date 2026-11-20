@@ -3,10 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-   Fecha a conexão (com rollback opcional) antes de sair.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload, bool $rollback = false): void
 {
     if ($conn instanceof mysqli) {
@@ -21,9 +18,7 @@ function responder(?mysqli $conn, int $status, array $payload, bool $rollback = 
     exit;
 }
 
-/* ======================================================
-   1) Carregar conexão
-====================================================== */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -40,18 +35,14 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ======================================================
-   2) Validar usuário autenticado
-====================================================== */
+/* 2) Autenticação */
 $id_usuario = $_SESSION['user_id'] ?? $_SESSION['id_usuario'] ?? null;
 if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Usuário não autenticado']);
 }
 $id_usuario = intval($id_usuario);
 
-/* ======================================================
-   3) Receber valor do frontend
-====================================================== */
+/* 3) Receber o valor */
 $input = json_decode(file_get_contents('php://input'), true);
 $valor = isset($input['valor']) ? floatval($input['valor']) : 0.0;
 
@@ -59,13 +50,8 @@ if ($valor <= 0) {
     responder($conn, 400, ['success' => false, 'message' => 'Valor inválido']);
 }
 
-/* ======================================================
-   4) Calcular intervalo do mês atual
-   — UPDATE se já existe renda NESTE MÊS
-   — INSERT se não existe ainda neste mês
-   Isso garante que cada mês tem seu próprio registro,
-   preservando o histórico e zerando corretamente na virada.
-====================================================== */
+/* 4) Intervalo do mês atual
+   Atualiza a renda se já existir neste mês; senão insere (um registro por mês). */
 $descricao          = 'Renda Mensal';
 $tipo               = 'fixa';
 $hoje               = new DateTimeImmutable('today');
@@ -73,9 +59,7 @@ $data_receita       = $hoje->format('Y-m-d');
 $primeiroDiaMes     = $hoje->modify('first day of this month')->format('Y-m-d');
 $primeiroDiaProximo = $hoje->modify('first day of next month')->format('Y-m-d');
 
-/* Verificar + gravar dentro de uma transação, para que duas
-   requisições simultâneas nunca criem dois registros de renda
-   para o mesmo mês (condição de corrida no check-then-insert). */
+/* Verifica e grava na mesma transação, evitando dois registros de renda no mesmo mês em requisições simultâneas */
 $conn->begin_transaction();
 
 try {
@@ -99,7 +83,7 @@ try {
     $resultadoCheck = $check->get_result();
 
     if ($resultadoCheck->num_rows > 0) {
-        /* ── Existe neste mês → UPDATE ── */
+        /* Existe neste mês: UPDATE */
         $linhaExistente = $resultadoCheck->fetch_assoc();
         $check->close();
 
@@ -113,7 +97,7 @@ try {
         $mensagem = 'Renda mensal atualizada com sucesso';
 
     } else {
-        /* ── Não existe neste mês → INSERT (novo registro mensal) ── */
+        /* Não existe neste mês: INSERT */
         $check->close();
 
         $stmt = $conn->prepare("

@@ -1,14 +1,10 @@
-// ==========================================================
-// FINANÇAS JÁ
-// CONFIGURAÇÃO CENTRAL DO SISTEMA
-// Versão 4.0.0
-// ==========================================================
+// Configuração central do sistema
 
 export const CONFIG = {
 
     VERSION: "4.0.0",
 
-    // armazenamento local
+    // Armazenamento local
     STORAGE_KEY: "financas-gastos-v4",
     OLD_STORAGE_KEYS: [
         "financas-gastos-v3"
@@ -20,9 +16,7 @@ export const CONFIG = {
     TOAST_DURATION: 3500,
 
 
-// ======================================================
-// CATEGORIAS
-// ======================================================
+// Categorias
 
 CATEGORIAS_DB: {
 
@@ -44,9 +38,7 @@ CATEGORIAS_DB: {
 
 },
 
-// ======================================================
-// ID -> SLUG
-// ======================================================
+// ID para slug
 
 CATEGORIA_SLUG_MAP: {
 
@@ -68,9 +60,7 @@ CATEGORIA_SLUG_MAP: {
 
 },
 
-// ======================================================
-// SLUG -> ID
-// ======================================================
+// Slug para ID
 
 CATEGORIA_ID_MAP: {
 
@@ -93,9 +83,7 @@ CATEGORIA_ID_MAP: {
 },
 
 
-    // ======================================================
-    // TIPOS DE GASTO
-    // ======================================================
+    // Tipos de gasto
 
     TIPOS_DB: {
 
@@ -116,9 +104,7 @@ CATEGORIA_ID_MAP: {
     },
 
 
-    // ======================================================
-    // STATUS FINANCEIRO
-    // ======================================================
+    // Status financeiro
 
     STATUS_DB: {
 
@@ -163,10 +149,7 @@ CATEGORIA_ID_MAP: {
 
 
 
-    // ======================================================
-    // LIMITES POR CATEGORIA
-    // Agora considerando quantidade de moradores
-    // ======================================================
+    // Limites por categoria (% da renda)
 
 
 CATEGORY_LIMITS:{
@@ -250,9 +233,7 @@ CATEGORY_LIMITS:{
 
 
 
-    // ======================================================
-    // REGRA 50/30/20
-    // ======================================================
+    // Regra 50/30/20
 
 
 CATEGORY_GROUPS:{
@@ -299,9 +280,7 @@ CATEGORY_GROUPS:{
 
 
 
-    // ======================================================
-    // CORES
-    // ======================================================
+    // Cores
 
 
 CATEGORY_COLORS:{

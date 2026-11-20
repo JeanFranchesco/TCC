@@ -3,9 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload): void
 {
     if ($conn instanceof mysqli) {
@@ -16,9 +14,7 @@ function responder(?mysqli $conn, int $status, array $payload): void
     exit;
 }
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -35,9 +31,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -46,9 +40,7 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Não autenticado']);
 }
 
-/* ================================================================
-   3) Entrada
-================================================================ */
+/* 3) Entrada */
 $input = $_SERVER['REQUEST_METHOD'] === 'POST'
     ? (json_decode(file_get_contents('php://input'), true) ?? [])
     : $_GET;
@@ -61,9 +53,7 @@ try {
 
 switch ($acao) {
 
-    /* ============================================================
-       GET PROFILE — retorna todos os dados do perfil do usuário
-    ============================================================ */
+    /* Obter perfil */
     case 'get_profile':
         $stmt = $conn->prepare(
             "SELECT nome, email, telefone, notificacoes, emails_semanais, plano
@@ -89,9 +79,7 @@ switch ($acao) {
             'plano'           => $result['plano']           ?? 'free'
         ]);
 
-    /* ============================================================
-       UPDATE PROFILE — salva nome, email, telefone, preferências e plano
-    ============================================================ */
+    /* Atualizar perfil */
     case 'update_profile':
         $nome            = mb_substr(trim((string)($input['nome']     ?? '')), 0, 100);
         $email           = mb_substr(trim((string)($input['email']    ?? '')), 0, 150);
@@ -158,9 +146,7 @@ switch ($acao) {
             'plano'   => $plano
         ]);
 
-    /* ============================================================
-       CHANGE PASSWORD — altera a senha do usuário
-    ============================================================ */
+    /* Alterar senha */
     case 'change_password':
         $senhaAtual = (string)($input['senha_atual'] ?? '');
         $novaSenha  = (string)($input['nova_senha']  ?? '');
@@ -204,15 +190,13 @@ switch ($acao) {
 
         responder($conn, 200, ['success' => true, 'message' => 'Senha alterada com sucesso!']);
 
-    /* ============================================================
-       DEFAULT — ação inválida
-    ============================================================ */
+    /* Ação inválida */
     default:
         responder($conn, 400, ['success' => false, 'message' => 'Ação inválida']);
 }
 
 } catch (Throwable $e) {
-    /* Erros internos: log detalhado no servidor, mensagem genérica pro cliente */
+    /* Erros internos: log detalhado no servidor e mensagem genérica para o cliente */
     error_log('profile_controller.php error: ' . $e->getMessage());
     responder($conn, 500, ['success' => false, 'message' => 'Erro interno ao processar a solicitação']);
 }

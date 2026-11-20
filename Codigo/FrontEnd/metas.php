@@ -1,7 +1,7 @@
 <?php
-// Define variáveis ANTES do include do header
+// Variáveis da página (definir antes do include do cabeçalho)
 $page_title = "Metas";
-$show_export_button = false;   // ← botão Exportar fica escondido nesta página
+$show_export_button = false; // Oculta o botão Exportar
 
 include 'layouts/header.php';
 ?>
@@ -46,7 +46,7 @@ include 'layouts/header.php';
         </div>
     </div>
 
-    <!-- LOADING -->
+    <!-- Carregando -->
     <div id="loading" class="loading-overlay hidden">
         <div class="flex flex-col items-center">
             <div class="loading-spinner"></div>

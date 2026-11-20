@@ -1,5 +1,4 @@
-// ========== GERENCIADOR DE TEMA ==========
-// Finanças Já v3.1.0
+// Gerenciador de tema
 
 import { CONFIG }       from './configuracao.js';
 import { ChartManager } from './gerenciadorGraficos.js';

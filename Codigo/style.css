@@ -1,9 +1,6 @@
-       /* ============================================
-           Finanças Já - Landing Page
-           Modern Design with Animations
-           ============================================ */
+/* Finanças Já - estilos da página inicial */
 
-        /* === CSS VARIABLES === */
+        /* Variáveis */
         :root {
             --color-bg-primary: #0a0a0b;
             --color-bg-secondary: #0f0f11;
@@ -93,7 +90,7 @@
             transition: background-color var(--transition-base);
         }
 
-        /* Skip Link */
+        /* Link de pular para o conteúdo */
         .skip-link {
             position: absolute;
             left: -9999px;
@@ -113,7 +110,7 @@
             box-shadow: var(--shadow-xl);
         }
 
-        /* Navbar */
+        /* Barra de navegação */
         .navbar {
             background: var(--color-surface) !important;
             border-bottom: 1px solid var(--color-border);
@@ -207,7 +204,7 @@
             justify-content: center;
         }
 
-        /* Hero Section */
+        /* Seção principal (hero) */
         .hero {
             min-height: calc(100vh - 76px);
             display: flex;
@@ -303,7 +300,7 @@
             font-size: 1.125rem;
         }
 
-        /* Stats Section */
+        /* Seção de estatísticas */
         .stats-section {
             padding: 3rem 1rem;
             background: var(--color-bg-secondary);
@@ -342,7 +339,7 @@
             color: var(--color-text-secondary);
         }
 
-        /* Benefits Section */
+        /* Seção de benefícios */
         .benefits {
             padding: 6rem 1rem;
             position: relative;
@@ -436,7 +433,7 @@
             margin: 0;
         }
 
-        /* Charts Section */
+        /* Seção de gráficos */
         .charts-section {
             padding: 6rem 1rem;
             background: var(--color-bg-secondary);
@@ -484,7 +481,7 @@
             height: 300px;
         }
 
-        /* CTA Section */
+        /* Seção de chamada para ação */
         .cta-section {
             padding: 6rem 1rem;
             text-align: center;
@@ -518,7 +515,7 @@
             margin-bottom: 2rem;
         }
 
-        /* Footer */
+        /* Rodapé */
         footer {
             background: var(--color-surface);
             border-top: 1px solid var(--color-border);
@@ -542,7 +539,7 @@
             text-decoration: underline;
         }
 
-        /* Animations */
+        /* Animações */
         @keyframes pulse {
             0%, 100% {
                 transform: scale(1);
@@ -558,7 +555,7 @@
             animation: pulse 2s ease-in-out infinite;
         }
 
-        /* Responsive */
+        /* Responsividade */
         @media (max-width: 768px) {
             .hero {
                 min-height: auto;

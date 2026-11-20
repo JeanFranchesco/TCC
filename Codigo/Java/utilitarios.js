@@ -1,14 +1,13 @@
-// ========== UTILITÁRIOS ==========
-// Finanças Já v3.1.0
+// Utilitários
 
 import { CONFIG } from './configuracao.js';
 
 export const Utils = {
-  // ── Seletores ─────────────────────────────────────────────────────
+  // Seletores
   $  : (sel) => document.querySelector(sel),
   $$ : (sel) => document.querySelectorAll(sel),
 
-  // ── Formatação de moeda ───────────────────────────────────────────
+  // Formatação de moeda
   formatter: new Intl.NumberFormat('pt-BR', {
     style   : 'currency',
     currency: 'BRL'
@@ -19,31 +18,31 @@ export const Utils = {
     return this.formatter.format(isNaN(n) ? 0 : n);
   },
 
-  // ── Formatação de data ────────────────────────────────────────────
+  // Formatação de data
   formatDate(dateString) {
     if (!dateString) return '—';
-    // Garante que a string seja tratada como UTC para evitar off-by-one
+    // Usa só a parte da data, evitando erro de fuso horário
     const raw  = String(dateString).split('T')[0];
     const [y, m, d] = raw.split('-');
     if (!y || !m || !d) return '—';
     return `${d}/${m}/${y}`;
   },
 
-  // ── Converte "YYYY-MM-DD" → ISO completo ─────────────────────────
+  // Converte YYYY-MM-DD para ISO
   parseDateToISO(dateString) {
     if (!dateString) return new Date().toISOString();
     const date = new Date(`${dateString}T00:00:00`);
     return isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
   },
 
-  // ── Sanitização HTML ──────────────────────────────────────────────
+  // Escape de HTML
   escapeHtml(str = '') {
     const div = document.createElement('div');
     div.textContent = String(str);
     return div.innerHTML;
   },
 
-  // ── Animação de valor numérico (easing quartic) ───────────────────
+  // Animação de valor numérico
   animateValue(element, endValue, duration = CONFIG?.ANIMATION_DURATION ?? 800) {
     if (!element) return;
 
@@ -72,7 +71,7 @@ export const Utils = {
     requestAnimationFrame(update);
   },
 
-  // ── Toast de notificação ──────────────────────────────────────────
+  // Toast de notificação
   showToast(message, type = 'success') {
     const toastEl = this.$('#notificationToast');
     if (!toastEl) return;
@@ -102,7 +101,7 @@ export const Utils = {
     toast.show();
   },
 
-  // ── Debounce simples ──────────────────────────────────────────────
+  // Debounce
   debounce(fn, delay = 300) {
     let timer;
     return (...args) => {
@@ -111,7 +110,7 @@ export const Utils = {
     };
   },
 
-  // ── Gera ID único temporário (fallback antes de obter ID do BD) ───
+  // ID temporário (até obter o ID do banco)
   tempId() {
     return Date.now() + Math.floor(Math.random() * 1000);
   }

@@ -1,20 +1,13 @@
 <?php
-/* ================================================================
-   get_historico.php — Finanças Já
-   Arquivo: ../php/get_historico.php
-
-   Modos de uso:
-   - Sem parâmetros ou só ?ano=YYYY  → retorna totais mensais do ano
-   - ?ano=YYYY&mes=MM               → retorna detalhes do mês
-================================================================ */
+/* get_historico.php
+   Sem parâmetros ou só ?ano=YYYY: totais mensais do ano.
+   Com ?ano=YYYY&mes=MM: detalhes do mês. */
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     http_response_code(500);
@@ -35,9 +28,7 @@ if (!($conn instanceof mysqli)) {
     exit;
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -48,22 +39,16 @@ if (empty($id_usuario)) {
     exit;
 }
 
-/* ================================================================
-   3) Parâmetros de entrada
-================================================================ */
+/* 3) Parâmetros de entrada */
 $ano = isset($_GET['ano']) ? intval($_GET['ano']) : (int) date('Y');
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : null;
 
-/* ================================================================
-   4) Consulta
-================================================================ */
+/* 4) Consulta */
 try {
 
     if ($mes !== null) {
 
-        /* ────────────────────────────────────────────────────────
-           Modo MENSAL: detalhes de gastos + receitas de um mês
-        ──────────────────────────────────────────────────────── */
+        /* Modo mensal: detalhes de gastos e receitas do mês */
         $primeiroDia           = sprintf('%04d-%02d-01', $ano, $mes);
         $primeiroDiaProximoMes = date('Y-m-01', strtotime($primeiroDia . ' +1 month'));
 
@@ -173,9 +158,7 @@ try {
 
     } else {
 
-        /* ────────────────────────────────────────────────────────
-           Modo ANUAL: totais de gastos e receitas por mês
-        ──────────────────────────────────────────────────────── */
+        /* Modo anual: totais de gastos e receitas por mês */
         $stmtAnual = $conn->prepare("
             SELECT
                 m.mes,

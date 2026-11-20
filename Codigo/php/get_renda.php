@@ -1,20 +1,12 @@
 <?php
-/* ================================================================
-   get_renda.php — Finanças Já
-   Arquivo: ../php/get_renda.php
-
-   Retorna a renda mensal do usuário autenticado para o mês atual.
-   Se não houver renda cadastrada neste mês, retorna valor 0
-   para que o frontend saiba que ela precisa ser informada.
-================================================================ */
+/* get_renda.php
+   Retorna a renda mensal do mês atual (0 se ainda não cadastrada). */
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     http_response_code(500);
@@ -35,9 +27,7 @@ if (!($conn instanceof mysqli)) {
     exit;
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -48,17 +38,13 @@ if (empty($id_usuario)) {
     exit;
 }
 
-/* ================================================================
-   3) Intervalo do mês atual (fonte de verdade = servidor)
-================================================================ */
+/* 3) Intervalo do mês atual (calculado no servidor) */
 $hoje               = new DateTimeImmutable('today');
 $primeiroDiaMes     = $hoje->modify('first day of this month')->format('Y-m-d');
 $primeiroDiaProximo = $hoje->modify('first day of next month')->format('Y-m-d');
 $mesReferencia      = $hoje->format('Y-m');   // ex: "2026-06"
 
-/* ================================================================
-   4) Buscar renda do mês atual
-================================================================ */
+/* 4) Buscar a renda do mês atual */
 try {
     $sql = "
         SELECT valor, data_receita

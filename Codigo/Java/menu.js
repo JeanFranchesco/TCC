@@ -1,36 +1,16 @@
-/* ================================================================
-   menu.js — Finanças Já v3.4.0
-   Arquivo: ../Java/menu.js
-
-   Correções desta versão:
-   - Categorias (cores/labels) agora vêm de configuracao.js — antes
-     o menu.js tinha sua PRÓPRIA lista com só 4 categorias
-     (alimentacao/energia/transporte/lazer), então qualquer gasto nas
-     outras 11 categorias reais (moradia, saude, educacao, compras,
-     tecnologia, assinaturas, servicos, impostos, investimentos,
-     animais, presentes) caía tudo em "Outros" no gráfico do painel.
-   - data_gasto sempre gerada pelo servidor (PHP), nunca pelo frontend
-   - QuickActionsManager não intercepta links <a> com href real
-   - _toSlug normaliza acentos via NFD para evitar mismatch de encoding
-   - Logs de debug removidos (versão de produção limpa)
-================================================================ */
+/* menu.js — Painel principal (dashboard) */
 import { CONFIG as APP_CONFIG } from './configuracao.js';
 
 (() => {
   'use strict';
 
-  /* ================================================================
-     CONFIGURAÇÃO GLOBAL (só o que é específico deste arquivo —
-     categorias vêm de APP_CONFIG, importado de configuracao.js)
-  ================================================================ */
+  /* Configuração local (as categorias vêm de configuracao.js) */
   const CONFIG = {
     animationDuration: 900,
     storageKey: 'financas-theme',
   };
 
-  /* ================================================================
-     UTILS
-  ================================================================ */
+  /* Utilitários */
   const Utils = {
 
     formatCurrency(value) {
@@ -90,9 +70,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
       return document.documentElement.classList.contains('light-theme');
     },
 
-    /* Normaliza qualquer nome de categoria para slug ASCII sem acentos.
-       Aceita qualquer uma das 15 categorias reais (via APP_CONFIG),
-       não só um subconjunto fixo. */
+    /* Converte o nome de uma categoria em slug ASCII sem acentos (aceita as 15 categorias de APP_CONFIG) */
     toSlug(str) {
       if (!str) return 'outros';
       const normalized = String(str)
@@ -103,14 +81,13 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
       return APP_CONFIG.CATEGORIA_ID_MAP?.[normalized] ? normalized : 'outros';
     },
 
-    /* Rótulo legível de um slug, usando a mesma fonte de dados que o
-       resto do app (CATEGORIAS_DB + CATEGORIA_ID_MAP). */
+    /* Rótulo de um slug (CATEGORIAS_DB + CATEGORIA_ID_MAP) */
     getCategoryLabel(slug) {
       const id = APP_CONFIG.CATEGORIA_ID_MAP?.[slug];
       return APP_CONFIG.CATEGORIAS_DB?.[id] || slug;
     },
 
-    /* Cor de um slug, usando a mesma paleta que o resto do app. */
+    /* Cor de um slug (paleta do app) */
     getCategoryColor(slug) {
       return APP_CONFIG.CATEGORY_COLORS?.[slug] || '#9c9ca4';
     },
@@ -121,9 +98,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     LOADING MANAGER
-  ================================================================ */
+  /* Gerenciador de carregamento */
   const LoadingManager = {
     overlay: null,
 
@@ -141,9 +116,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     THEME MANAGER
-  ================================================================ */
+  /* Gerenciador de tema */
   const ThemeManager = {
     currentTheme: 'dark',
     toggle      : null,
@@ -174,9 +147,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     CHART MANAGER
-  ================================================================ */
+  /* Gerenciador do gráfico */
   const ChartManager = {
     chart      : null,
     _hidden    : {},
@@ -219,7 +190,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
 
       this._destroyChart();
 
-      /* Plugin de label central */
+      /* Plugin do texto central */
       const centerLabelPlugin = {
         id: 'centerLabel',
         afterDraw(chart) {
@@ -324,9 +295,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     PROFILE MANAGER
-  ================================================================ */
+  /* Gerenciador de perfil */
   const ProfileManager = {
     modal        : null,
     passwordModal: null,
@@ -360,7 +329,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
           this.updateUI();
           if (this.isFirstTime) this.showFirstTimeOnboarding();
         }
-      } catch (e) { /* silencioso em produção */ }
+      } catch (e) { /* ignora o erro */ }
     },
 
     showFirstTimeOnboarding() {
@@ -597,9 +566,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     SIDEBAR MANAGER
-  ================================================================ */
+  /* Gerenciador da barra lateral */
   const SidebarManager = {
     sidebar: null,
     toggle : null,
@@ -660,9 +627,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     STATS MANAGER
-  ================================================================ */
+  /* Gerenciador de estatísticas */
   const StatsManager = {
     animateCounters() {
       document.querySelectorAll('.stat-value[data-target]').forEach((el, i) => {
@@ -682,9 +647,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     DATE TIME MANAGER
-  ================================================================ */
+  /* Gerenciador de data e hora */
   const DateTimeManager = {
     element: null,
 
@@ -700,9 +663,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     EXPORT MANAGER
-  ================================================================ */
+  /* Gerenciador de exportação */
   const ExportManager = {
     init() {
       Utils.on('exportCsv', 'click', () => this.exportToCSV());
@@ -733,10 +694,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     QUICK ACTIONS MANAGER
-     Só intercepta <button> sem href — links <a> navegam normalmente
-  ================================================================ */
+  /* Ações rápidas: só intercepta <button> sem href; links <a> navegam normalmente */
   const QuickActionsManager = {
     init() {
       document.querySelectorAll('.action-btn').forEach(btn => {
@@ -750,9 +708,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     }
   };
 
-  /* ================================================================
-     POPULAR LEGENDA HTML (#legendList)
-  ================================================================ */
+  /* Preenche a legenda HTML (#legendList) */
   function populateLegend(categories, slugs, colors) {
     const legendList = document.getElementById('legendList');
     if (!legendList) return;
@@ -818,9 +774,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     });
   }
 
-  /* ================================================================
-     FETCH & APPLY DASHBOARD DATA
-  ================================================================ */
+  /* Busca e aplica os dados do dashboard */
   async function fetchDashboardData() {
     try {
       const [rendaRes, gastosRes] = await Promise.all([
@@ -913,9 +867,7 @@ import { CONFIG as APP_CONFIG } from './configuracao.js';
     LoadingManager.hide();
   }
 
-  /* ================================================================
-     INICIALIZAÇÃO
-  ================================================================ */
+  /* Inicialização */
   document.addEventListener('DOMContentLoaded', async () => {
 
     LoadingManager.init();

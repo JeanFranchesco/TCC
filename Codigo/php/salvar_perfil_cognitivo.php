@@ -3,9 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload): void
 {
     if ($conn instanceof mysqli) {
@@ -25,15 +23,11 @@ function prep(mysqli $conn, string $sql): mysqli_stmt
     return $stmt;
 }
 
-/* Vieses reconhecidos pelo app (mesma lista de vies_cognitivo.php).
-   Sem essa whitelist, um valor qualquer podia ser gravado no banco
-   e depois quebrar a tela de resultado, que faz $vieses[$vies]. */
+/* Vieses e níveis aceitos (mesma lista de vies_cognitivo.php) */
 const VIESES_VALIDOS = ['aversao_perda', 'efeito_manada', 'excesso_confianca', 'vies_emocional'];
 const NIVEIS_VALIDOS = ['Baixo', 'Médio', 'Alto'];
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -50,9 +44,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id']))        $id_usuario = intval($_SESSION['user_id']);
 elseif (!empty($_SESSION['id_usuario'])) $id_usuario = intval($_SESSION['id_usuario']);
@@ -61,17 +53,8 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Usuário não autenticado']);
 }
 
-/* ================================================================
-   3) Receber e validar JSON
-   ================================================================
-   Com declare(strict_types=1), funções como trim() exigem que o
-   argumento já seja string — se $data['vies'] vier como número,
-   array ou null (json_decode aceita qualquer tipo em JSON válido),
-   um trim() direto nele lança TypeError, que antes NÃO era pego
-   pelo try/catch (esse código rodava antes do try começar) e
-   derrubava o endpoint com erro fatal cru em vez de um JSON de
-   erro. Agora tudo é validado como string antes de qualquer coisa.
-================================================================ */
+/* 3) Receber e validar JSON
+   Os tipos são validados antes de usar trim(), que lança TypeError sob strict_types. */
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (
@@ -97,9 +80,7 @@ if (!in_array($nivel, NIVEIS_VALIDOS, true)) {
     responder($conn, 400, ['success' => false, 'message' => 'Nível informado é inválido']);
 }
 
-/* ================================================================
-   4) Salvar (perfil atual + histórico), tudo na mesma transação
-================================================================ */
+/* 4) Salvar (perfil atual e histórico) na mesma transação */
 $conn->begin_transaction();
 
 try {

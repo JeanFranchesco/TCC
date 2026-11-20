@@ -1,16 +1,13 @@
 "use strict";
 
-// ═══════════════════════════════════════════════════════
-//  FinançasJá — Chat Server v3.5
-//  Stack: Express · Ollama · Node.js
-// ═══════════════════════════════════════════════════════
+// Servidor do chat (Express e Ollama)
 
 const express = require("express");
 const path    = require("path");
 const cors    = require("cors");
 const axios   = require("axios");
 
-// ─── Configuração centralizada ────────────────────────
+// Configuração
 const CONFIG = {
 
   // Servidor Node.js
@@ -62,7 +59,7 @@ const CONFIG = {
   RATE_LIMIT_MS: 1_000
 };
 
-// ─── App ──────────────────────────────────────────────
+// Aplicação
 const app = express();
 
 const frontPath = path.join(__dirname, "..", "FrontEnd");
@@ -81,9 +78,7 @@ app.get("/", (_req, res) =>
   })
 );
 
-// ═══════════════════════════════════════════════════════
-//  LOGGER
-// ═══════════════════════════════════════════════════════
+// Log
 
 const ICONS = {
   info: "ℹ️ ",
@@ -104,9 +99,7 @@ function log(level, msg, extra = "") {
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//  RATE LIMITER
-// ═══════════════════════════════════════════════════════
+// Limite de requisições
 
 const lastRequest = new Map();
 
@@ -133,9 +126,7 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
-// ═══════════════════════════════════════════════════════
-//  STATUS FINANCEIRO
-// ═══════════════════════════════════════════════════════
+// Status financeiro
 
 const STATUS_LEVELS = [
   {
@@ -220,9 +211,7 @@ function calcularStatusFinanceiro(ctx) {
   };
 }
 
-// ═══════════════════════════════════════════════════════
-//  RENDA
-// ═══════════════════════════════════════════════════════
+// Renda
 
 function normalizarRenda(rendaRaw) {
   if (rendaRaw == null) {
@@ -246,9 +235,7 @@ function normalizarRenda(rendaRaw) {
   return 0;
 }
 
-// ═══════════════════════════════════════════════════════
-//  GASTOS
-// ═══════════════════════════════════════════════════════
+// Gastos
 
 function normalizarGastos(gastosRaw) {
   if (!Array.isArray(gastosRaw)) {
@@ -259,8 +246,8 @@ function normalizarGastos(gastosRaw) {
     };
   }
 
-  const MAX_ITENS   = 500;  // teto defensivo pra somar/agrupar
-  const MAX_LISTADOS = 15;  // teto do que realmente vai pro prompt
+  const MAX_ITENS   = 500;  // limite máximo de itens a somar/agrupar
+  const MAX_LISTADOS = 15;  // limite de itens enviados ao prompt
 
   let total = 0;
 
@@ -294,10 +281,7 @@ function normalizarGastos(gastosRaw) {
     porCategoria[nome] =
       (porCategoria[nome] || 0) + valor;
 
-    // A descrição de cada gasto (o "produto"/item em si) já vem no
-    // payload — antes ela era descartada aqui, só o total por
-    // categoria era aproveitado. Guarda os mais recentes (a lista já
-    // chega ordenada por data_gasto DESC de get_gastos.php).
+    // Guarda a descrição dos gastos mais recentes (lista já ordenada por data_gasto DESC)
     if (itens.length < MAX_LISTADOS) {
       const descricao = String(g.descricao || "").trim().slice(0, 60);
       if (descricao) {
@@ -317,9 +301,7 @@ function normalizarGastos(gastosRaw) {
   };
 }
 
-// ═══════════════════════════════════════════════════════
-//  CATEGORIAS
-// ═══════════════════════════════════════════════════════
+// Categorias
 
 function sanitizarCategorias(categorias) {
 
@@ -346,9 +328,7 @@ function sanitizarCategorias(categorias) {
     : null;
 }
 
-// ═══════════════════════════════════════════════════════
-//  HISTÓRICO
-// ═══════════════════════════════════════════════════════
+// Histórico
 
 const NOMES_MESES = [
   "Jan",
@@ -420,9 +400,7 @@ function normalizarHistorico(
     .slice(-12);
 }
 
-// ═══════════════════════════════════════════════════════
-//  HISTÓRICO JÁ AGREGADO
-// ═══════════════════════════════════════════════════════
+// Histórico já agregado
 
 function sanitizarHistoricoResumo(
   historico
@@ -454,9 +432,7 @@ function sanitizarHistoricoResumo(
     }));
 }
 
-// ═══════════════════════════════════════════════════════
-//  FORMATAÇÃO DE CATEGORIAS
-// ═══════════════════════════════════════════════════════
+// Formatação de categorias
 
 function formatarCategorias(categorias) {
 
@@ -487,9 +463,7 @@ function formatarCategorias(categorias) {
   );
 }
 
-// Lista de itens/produtos do mês atual (descrição de cada gasto).
-// Complementa o bloco de categorias — categoria é o resumo, isto
-// aqui é o detalhe, pra quando o usuário pergunta "o que eu comprei".
+// Itens do mês atual (descrição de cada gasto), para perguntas como "o que eu comprei"
 function formatarItens(itens, totalItens) {
 
   if (!Array.isArray(itens) || !itens.length) {
@@ -515,14 +489,9 @@ function formatarItens(itens, totalItens) {
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//  HISTÓRICO DE CATEGORIAS (meses anteriores)
-//
-//  Aceita [{ ano, mes, categorias: { nome: valor, ... } }, ...],
-//  um item por mês — vem de get_historico.php no modo mensal
-//  (?ano=X&mes=Y), já que o modo anual só traz totais, sem
-//  detalhamento por categoria.
-// ═══════════════════════════════════════════════════════
+// Histórico de categorias (meses anteriores)
+// Aceita [{ ano, mes, categorias: { nome: valor } }], um item por mês,
+// vindo de get_historico.php no modo mensal (?ano=X&mes=Y)
 
 function normalizarHistoricoCategorias(raw) {
 
@@ -608,9 +577,7 @@ function formatarHistoricoCategorias(historicoCategorias) {
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//  FORMATAÇÃO DO HISTÓRICO
-// ═══════════════════════════════════════════════════════
+// Formatação do histórico
 
 function formatarHistorico(historico) {
 
@@ -666,9 +633,7 @@ function formatarHistorico(historico) {
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//  SYSTEM PROMPT
-// ═══════════════════════════════════════════════════════
+// Prompt do sistema
 
 function buildSystemPrompt(
   fin,
@@ -826,9 +791,7 @@ IDIOMA:
 Português do Brasil.`;
 }
 
-// ═══════════════════════════════════════════════════════
-//  CHAMADA OLLAMA
-// ═══════════════════════════════════════════════════════
+// Chamada ao Ollama
 
 async function chamarOllama(
   model,
@@ -871,7 +834,7 @@ async function chamarOllama(
       }
     );
 
-  // ─── Diagnóstico da resposta ────────────────
+  // Diagnóstico da resposta
 
   log(
     "info",
@@ -898,13 +861,11 @@ async function chamarOllama(
   return reply;
 }
 
-// ═══════════════════════════════════════════════════════
-//  GERAÇÃO COM FALLBACK
-// ═══════════════════════════════════════════════════════
+// Geração com modelo alternativo
 
 async function gerarResposta(messages) {
 
-  // ─── Modelo principal ──────────────────────
+  // Modelo principal
 
   try {
 
@@ -936,7 +897,7 @@ async function gerarResposta(messages) {
     );
   }
 
-  // ─── Fallback ──────────────────────────────
+  // Modelo alternativo
 
   try {
 
@@ -969,9 +930,7 @@ async function gerarResposta(messages) {
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//  VALIDAÇÃO
-// ═══════════════════════════════════════════════════════
+// Validação
 
 function validarMensagem(message) {
 
@@ -1002,9 +961,7 @@ function validarMensagem(message) {
   return null;
 }
 
-// ═══════════════════════════════════════════════════════
-//  HISTÓRICO DO CHAT
-// ═══════════════════════════════════════════════════════
+// Histórico do chat
 
 function sanitizarHistorico(history) {
 
@@ -1035,9 +992,7 @@ function sanitizarHistorico(history) {
     }));
 }
 
-// ═══════════════════════════════════════════════════════
-//  POST /chat
-// ═══════════════════════════════════════════════════════
+// POST /chat
 
 app.post(
   "/chat",
@@ -1046,7 +1001,7 @@ app.post(
     const ip =
       req.ip || "unknown";
 
-    // ─── Rate limit ───────────────────────────
+    // Limite de requisições
 
     if (!rateLimitOk(ip)) {
 
@@ -1065,7 +1020,7 @@ app.post(
       history = []
     } = req.body;
 
-    // ─── Validação ────────────────────────────
+    // Validação
 
     const erro =
       validarMensagem(message);
@@ -1079,18 +1034,14 @@ app.post(
         });
     }
 
-    // ══════════════════════════════════════════
-    //  RENDA
-    // ══════════════════════════════════════════
+    // Renda
 
     const rendaValor =
       normalizarRenda(
         contexto.renda
       );
 
-    // ══════════════════════════════════════════
-    //  GASTOS
-    // ══════════════════════════════════════════
+    // Gastos
 
     const gastosInfo =
       normalizarGastos(
@@ -1110,9 +1061,7 @@ app.post(
       contexto.categorias ||
       null;
 
-    // ══════════════════════════════════════════
-    //  STATUS FINANCEIRO
-    // ══════════════════════════════════════════
+    // Status financeiro
 
     const fin =
       calcularStatusFinanceiro({
@@ -1123,9 +1072,7 @@ app.post(
           totalGastos
       });
 
-    // ══════════════════════════════════════════
-    //  HISTÓRICO
-    // ══════════════════════════════════════════
+    // Histórico
 
     const historico =
       contexto.historico
@@ -1139,18 +1086,14 @@ app.post(
             contexto.historicoResumo
           );
 
-    // ══════════════════════════════════════════
-    //  HISTÓRICO DE CATEGORIAS (meses anteriores)
-    // ══════════════════════════════════════════
+    // Histórico de categorias (meses anteriores)
 
     const historicoCategorias =
       normalizarHistoricoCategorias(
         contexto.historicoCategorias
       );
 
-    // ══════════════════════════════════════════
-    //  MESSAGES
-    // ══════════════════════════════════════════
+    // Mensagens
 
     const messages = [
 
@@ -1181,9 +1124,7 @@ app.post(
       }
     ];
 
-    // ══════════════════════════════════════════
-    //  LOG
-    // ══════════════════════════════════════════
+    // Log
 
     const extras = [
 
@@ -1215,9 +1156,7 @@ app.post(
       `extras: ${extras}`
     );
 
-    // ══════════════════════════════════════════
-    //  IA
-    // ══════════════════════════════════════════
+    // IA
 
     const reply =
       await gerarResposta(
@@ -1235,9 +1174,7 @@ app.post(
   }
 );
 
-// ═══════════════════════════════════════════════════════
-//  GET /health
-// ═══════════════════════════════════════════════════════
+// GET /health
 
 app.get(
   "/health",
@@ -1275,9 +1212,7 @@ app.get(
     })
 );
 
-// ═══════════════════════════════════════════════════════
-//  404
-// ═══════════════════════════════════════════════════════
+// Rota não encontrada
 
 app.use(
   (_req, res) =>
@@ -1289,9 +1224,7 @@ app.use(
       })
 );
 
-// ═══════════════════════════════════════════════════════
-//  ERROR HANDLER
-// ═══════════════════════════════════════════════════════
+// Tratamento de erros
 
 app.use(
   (err, _req, res, _next) => {
@@ -1310,9 +1243,7 @@ app.use(
   }
 );
 
-// ═══════════════════════════════════════════════════════
-//  START
-// ═══════════════════════════════════════════════════════
+// Inicialização
 
 app.listen(
   CONFIG.PORT,

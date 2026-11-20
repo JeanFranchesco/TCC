@@ -1,9 +1,6 @@
-/* ============================================
-   FINANÇAS JÁ - BASE CSS (Unificado + Otimizado)
-   ============================================ */
 @import url('variables.css');
 
-/* ===================== RESET & BASE ===================== */
+/* Reset e base */
 *,
 *::before,
 *::after {
@@ -25,7 +22,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ===================== TOP HEADER ===================== */
+/* Cabeçalho superior */
 .top-header {
     background: #0a0a0b;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -35,7 +32,7 @@ body {
     backdrop-filter: blur(12px);
 }
 
-/* ===================== GLASS & CARDS ===================== */
+/* Cards */
 .glass {
     background: var(--color-glass);
     backdrop-filter: blur(48px);
@@ -43,7 +40,7 @@ body {
     border-radius: 18px;
 }
 
-/* ===================== BOTÕES PREMIUM ===================== */
+/* Botões */
 .btn-premium {
     transition: all var(--transition-slow, 0.3s ease);
     border-radius: 18px;
@@ -52,7 +49,7 @@ body {
     transform: translateY(-4px) scale(1.06);
 }
 
-/* ===================== META CARD ===================== */
+/* Card de meta */
 .meta-card {
     transition: all var(--transition-slow, 0.3s ease);
 }
@@ -61,7 +58,7 @@ body {
     box-shadow: var(--shadow-xl);
 }
 
-/* ===================== LOADING OVERLAY ===================== */
+/* Tela de carregamento */
 .loading-overlay {
     position: fixed;
     inset: 0;
@@ -87,12 +84,12 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* ===================== LIGHT THEME OVERRIDES ===================== */
+/* Tema claro */
 html.light-theme .glass {
     background: rgba(255,255,255,0.95) !important;
 }
 
-/* ===================== OUTROS ESTILOS QUE VOCÊ JÁ TINHA ===================== */
+/* Cards do dashboard */
 .stat-card, .chart-card, .dashboard-card {
     background: var(--color-glass);
     border: 1px solid var(--color-border);

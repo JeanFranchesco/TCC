@@ -1,18 +1,12 @@
 "use strict";
 
-// ═══════════════════════════════════════════════════════
-// FinançasJá
-// Servidor de Dicas Inteligentes
-// v1.0
-// ═══════════════════════════════════════════════════════
+// Servidor de dicas inteligentes (Express e Ollama)
 
 const express = require("express");
 const axios   = require("axios");
 const cors    = require("cors");
 
-// ═══════════════════════════════════════════════════════
-// CONFIGURAÇÕES
-// ═══════════════════════════════════════════════════════
+// Configurações
 
 const CONFIG = {
 
@@ -42,9 +36,7 @@ const CONFIG = {
 
 };
 
-// ═══════════════════════════════════════════════════════
-// EXPRESS
-// ═══════════════════════════════════════════════════════
+// Express
 
 const app = express();
 
@@ -54,9 +46,7 @@ app.use(express.json({
     limit: "50kb"
 }));
 
-// ═══════════════════════════════════════════════════════
-// LOGGER
-// ═══════════════════════════════════════════════════════
+// Log
 
 const ICONS = {
 
@@ -84,9 +74,7 @@ function log(tipo, mensagem, extra = "") {
 
 }
 
-// ═══════════════════════════════════════════════════════
-// STATUS DO SERVIDOR
-// ═══════════════════════════════════════════════════════
+// Status do servidor
 
 app.get("/health", (req, res) => {
 
@@ -107,9 +95,7 @@ app.get("/health", (req, res) => {
     });
 
 });
-// ═══════════════════════════════════════════════════════
-// PROMPT INTELIGENTE
-// ═══════════════════════════════════════════════════════
+// Prompt
 
 function montarPrompt(dados = {}) {
 
@@ -589,9 +575,7 @@ Somente JSON.
 `;
 
 }
-// ═══════════════════════════════════════════════════════
-// CONVERSOR DE RESPOSTA
-// ═══════════════════════════════════════════════════════
+// Conversão da resposta
 
 function extrairDicas(respostaIA) {
 
@@ -627,9 +611,7 @@ function extrairDicas(respostaIA) {
     return null;
 
 }
-// ═══════════════════════════════════════════════════════
-// COMUNICAÇÃO COM O OLLAMA
-// ═══════════════════════════════════════════════════════
+// Comunicação com o Ollama
 
 async function chamarOllama(model, prompt, timeout) {
 
@@ -676,28 +658,18 @@ async function chamarOllama(model, prompt, timeout) {
 
 }
 
-// ═══════════════════════════════════════════════════════
-// GERAÇÃO DAS DICAS
-// ═══════════════════════════════════════════════════════
+// Geração das dicas
 
 async function gerarDicasIA(dados) {
 
-    console.log("\n========== DADOS RECEBIDOS ==========\n");
-    console.log(JSON.stringify(dados, null, 2));
-
     const prompt = montarPrompt(dados);
-
-    console.log("\n========== PROMPT ==========\n");
-    console.log(prompt);
 
     log(
         "ai",
         `Gerando dicas para categoria "${dados.categoria}"`
     );
 
-    // ============================
-    // MODELO PRINCIPAL
-    // ============================
+    // Modelo principal
 
     try {
 
@@ -749,9 +721,7 @@ async function gerarDicasIA(dados) {
 
     }
 
-    // ============================
-    // FALLBACK
-    // ============================
+    // Modelo alternativo
 
     try {
 
@@ -798,9 +768,7 @@ async function gerarDicasIA(dados) {
 
     }
 
-    // ============================
-    // IA INDISPONÍVEL
-    // ============================
+    // IA indisponível
 
     return {
 
@@ -813,9 +781,7 @@ async function gerarDicasIA(dados) {
     };
 
 }
-// ═══════════════════════════════════════════════════════
-// ROTA DE DICAS INTELIGENTES
-// ═══════════════════════════════════════════════════════
+// Rota de dicas
 
 app.post("/tipsIA", async (req, res) => {
 
@@ -833,9 +799,7 @@ const {
     historicoFinanceiro
 } = req.body;
 
-        // =====================================
-        // VALIDAÇÕES
-        // =====================================
+        // Validações
 
         if (!categoria) {
 
@@ -869,9 +833,7 @@ const {
 
         );
 
-        // =====================================
-        // GERA DICAS
-        // =====================================
+        // Gera as dicas
 
 const resultado = await gerarDicasIA({
 
@@ -887,9 +849,7 @@ const resultado = await gerarDicasIA({
 
 });
 
-        // =====================================
-        // SUCESSO
-        // =====================================
+        // Sucesso
 
         if (resultado.success) {
 
@@ -905,9 +865,7 @@ const resultado = await gerarDicasIA({
 
         }
 
-        // =====================================
-        // IA INDISPONÍVEL
-        // =====================================
+        // IA indisponível
 
         return res.status(503).json({
 
@@ -948,9 +906,7 @@ const resultado = await gerarDicasIA({
     }
 
 });
-// ═══════════════════════════════════════════════════════
-// HEALTH CHECK
-// ═══════════════════════════════════════════════════════
+// Verificação de saúde
 
 app.get("/health", (_req, res) => {
 
@@ -972,9 +928,7 @@ app.get("/health", (_req, res) => {
 
 });
 
-// ═══════════════════════════════════════════════════════
-// ROTA NÃO ENCONTRADA
-// ═══════════════════════════════════════════════════════
+// Rota não encontrada
 
 app.use((_req, res) => {
 
@@ -988,9 +942,7 @@ app.use((_req, res) => {
 
 });
 
-// ═══════════════════════════════════════════════════════
-// TRATAMENTO GLOBAL DE ERROS
-// ═══════════════════════════════════════════════════════
+// Tratamento global de erros
 
 app.use((erro, _req, res, _next) => {
 
@@ -1014,9 +966,7 @@ app.use((erro, _req, res, _next) => {
 
 });
 
-// ═══════════════════════════════════════════════════════
-// INICIALIZAÇÃO
-// ═══════════════════════════════════════════════════════
+// Inicialização
 
 app.listen(CONFIG.PORT, () => {
 

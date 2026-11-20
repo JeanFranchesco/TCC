@@ -2,14 +2,9 @@
 session_start();
 
 /*
- * ⚠️ ATENÇÃO — LOGIN TEMPORÁRIO PARA DESENVOLVIMENTO
- * Enquanto não existir uma tela de login de verdade, qualquer
- * visitante sem sessão ativa vira automaticamente o usuário 1.
- * Isso é ok para testar sozinho, mas SE este projeto for usado
- * por mais de uma pessoa (ou publicado), qualquer um que abrir
- * a página cai na mesma conta e vê/edita os mesmos dados.
- * Antes de publicar de verdade: trocar isso por um redirect
- * para uma página de login real.
+ * Login temporário para desenvolvimento.
+ * Sem sessão ativa, o visitante vira o usuário 1.
+ * Antes de publicar, substituir por redirecionamento para a tela de login.
  */
 if (!isset($_SESSION['id_usuario'])) {
     $_SESSION['id_usuario'] = 1;
@@ -47,7 +42,7 @@ $show_export_button = false;
 </head>
 <body>
 
-<!-- ── HEADER ───────────────────────────────────────────────── -->
+<!-- Cabeçalho -->
 <header class="top-header" role="banner">
     <div class="max-w-7xl mx-auto px-8 py-4">
         <div class="flex justify-between items-center">
@@ -72,14 +67,14 @@ $show_export_button = false;
     </div>
 </header>
 
-<!-- ── CONTEÚDO PRINCIPAL ────────────────────────────────────── -->
+<!-- Conteúdo principal -->
 <main id="mainContent" class="container py-2" role="main">
     <div class="dashboard-card mx-auto">
         <div class="content-wrapper p-4">
 
             <h2 class="greeting mb-4">Registrar meus gastos</h2>
 
-            <!-- ── Cards de resumo ── -->
+            <!-- Cards de resumo -->
             <section aria-labelledby="resumoTitle">
                 <h3 id="resumoTitle" class="visually-hidden">Resumo financeiro</h3>
                 <div class="row g-3 mb-4">
@@ -107,8 +102,7 @@ $show_export_button = false;
                                     placeholder="R$ 0,00"
                                     aria-label="Digite sua renda mensal"
                                     inputmode="decimal">
-                                <!-- Texto inicial "Salvar" — gerenciadorInterface.js troca para
-                                     "Alterar" quando detecta renda já salva no servidor -->
+                                <!-- Começa como "Salvar"; gerenciadorInterface.js troca para "Alterar" quando já há renda salva -->
                                 <button id="saveRenda" class="btn btn-warning" type="button">
                                     <span>Salvar</span>
                                     <span class="visually-hidden">renda mensal</span>
@@ -128,7 +122,7 @@ $show_export_button = false;
                 </div>
             </section>
 
-            <!-- ── Regra 50/30/20 ── -->
+            <!-- Regra 50/30/20 -->
             <div id="regra503020Container" class="mb-4" style="display:none;">
                 <div class="regra-card">
 
@@ -209,7 +203,7 @@ $show_export_button = false;
                 </div>
             </div>
 
-            <!-- ── Informações da casa ── -->
+            <!-- Informações da casa -->
             <section class="content-card p-4 mb-4" aria-labelledby="casaTitle">
                 <h3 id="casaTitle" class="text-orange mb-3 fw-bold h5">
                     <i class="bi bi-house-door me-2" aria-hidden="true"></i>
@@ -239,7 +233,7 @@ $show_export_button = false;
                 </div>
             </section>
 
-            <!-- ── Formulário de adicionar gasto ── -->
+            <!-- Formulário de novo gasto -->
             <section class="content-card p-4 mb-4" aria-labelledby="addGastoTitle">
                 <h3 id="addGastoTitle" class="text-orange mb-3 fw-bold h5">
                     <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
@@ -367,7 +361,7 @@ $show_export_button = false;
                 </form>
             </section>
 
-            <!-- ── Gráfico ── -->
+            <!-- Gráfico -->
             <section class="chart-card p-4 mb-4" aria-labelledby="chartTitle">
                 <h3 id="chartTitle" class="text-orange mb-3 h5">
                     <i class="bi bi-pie-chart-fill me-2" aria-hidden="true"></i>
@@ -384,7 +378,7 @@ $show_export_button = false;
                 <div id="categoryStats" class="stats-grid" style="display:none;" role="region" aria-label="Estatísticas por categoria"></div>
             </section>
 
-            <!-- ── Tabela de gastos ── -->
+            <!-- Tabela de gastos -->
             <section class="content-card p-4" aria-labelledby="listaTitle">
                 <h3 id="listaTitle" class="text-orange mb-3 fw-bold h5">
                     <i class="bi bi-list-ul me-2" aria-hidden="true"></i>
@@ -424,7 +418,7 @@ $show_export_button = false;
     </div>
 </main>
 
-<!-- ── Modal de Dicas ── -->
+<!-- Modal de dicas -->
 <div class="modal fade" id="tipsModal" tabindex="-1" aria-labelledby="tipsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
@@ -443,7 +437,7 @@ $show_export_button = false;
     </div>
 </div>
 
-<!-- ── Modal de Edição ── -->
+<!-- Modal de edição -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -530,7 +524,7 @@ $show_export_button = false;
     </div>
 </div>
 
-<!-- ── Modal Resultado do Mês ── -->
+<!-- Modal de resultado do mês -->
 <div class="modal fade" id="modalMensagem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -548,7 +542,7 @@ $show_export_button = false;
     </div>
 </div>
 
-<!-- ── Toast ── -->
+<!-- Toast -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -560,18 +554,13 @@ $show_export_button = false;
     </div>
 </div>
 
-<!-- ── Scripts ──
-     ATENÇÃO: NÃO adicionar scripts inline aqui que manipulem renda,
-     saldo ou gastos. Toda essa lógica está em gerenciadorInterface.js.
-     O único script inline permitido é o de mostrar/ocultar nova categoria.
--->
+<!-- Scripts. A lógica de renda, saldo e gastos fica em gerenciadorInterface.js; não adicionar scripts inline para isso -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script type="module" src="../Java/gastos.js"></script>
 
 <script>
-/* Mostrar/ocultar campo de nova categoria.
-   Único script inline desta página — não manipula renda nem gastos. */
+/* Exibe o campo de nova categoria apenas quando "nova" está selecionada */
 document.getElementById('categoria')?.addEventListener('change', function () {
     const wrap  = document.getElementById('wrapCategoriaNova');
     const input = document.getElementById('categoria_nova');

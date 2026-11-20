@@ -1,11 +1,10 @@
-// ==================== METAS.JS - VERSÃO PREMIUM & PROFISSIONAL 2026 ====================
-// UI redesenhada com glassmorphism dark moderno
+// Metas do mês
 
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ==================== ELEMENTOS DO DOM ====================
+    // Elementos do DOM
     const btnCriar     = document.getElementById('btnCriar');
     const listaMetas   = document.getElementById('listaMetas');
     const rankingEl    = document.getElementById('ranking');
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // ==================== GERENCIADOR DE TEMA ====================
+    // Gerenciador de tema
     const ThemeManager = {
         currentTheme: 'dark',
         toggle: null,
@@ -55,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ==================== UTILITÁRIOS ====================
+    // Utilitários
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = String(str ?? '');
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== PROGRESSO CIRCULAR PREMIUM ====================
+    // Progresso circular
     function criarProgresso(percent) {
         // Circunferência para r=36 → 2π×36 ≈ 226.2
         const circunferencia = 226.2;
@@ -149,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     }
 
-    // ==================== CARD DE META ====================
+    // Card de meta
     function criarCardMeta(m) {
         const perc        = Math.min(Math.round((parseFloat(m.valor_atual) / parseFloat(m.valor_meta)) * 100), 100);
         const isConcluida = m.status === 'concluida';
@@ -292,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     }
 
-    // ==================== HOVER GLOW NOS CARDS ====================
+    // Brilho ao passar o mouse nos cards
     function ativarHoverGlow() {
         document.querySelectorAll('.meta-card-premium').forEach(card => {
             card.addEventListener('mouseenter', () => {
@@ -313,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== RESUMO FINANCEIRO ====================
+    // Resumo financeiro
     async function carregarResumo() {
         try {
             const res  = await fetch(`../php/metas_controller.php?acao=resumo_mes&_t=${Date.now()}`);
@@ -346,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==================== CRIAR META ====================
+    // Criar meta
     btnCriar.addEventListener('click', async () => {
         const titulo = document.getElementById('titulo').value.trim();
         const valor  = document.getElementById('valor_meta').value;
@@ -396,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ==================== CARREGAR METAS ====================
+    // Carregar metas
     async function carregarMetas() {
         toggleLoading(true);
 
@@ -456,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==================== DELETAR META ====================
+    // Excluir meta
     window.deletar = async function (id) {
         if (!confirm('Desistir dessa meta?\n\nVocê vai PERDER todos os pontos que apostou nela.')) return;
 
@@ -481,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ==================== RANKING GLOBAL ====================
+    // Ranking global
     async function carregarRanking() {
         try {
             const res  = await fetch(`../php/ranking_controller.php?_t=${Date.now()}`);
@@ -572,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==================== INICIALIZAÇÃO ====================
+    // Inicialização
     ThemeManager.init();
     carregarMetas();
     carregarRanking();

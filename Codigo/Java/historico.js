@@ -1,10 +1,6 @@
-// ================================================
-// HISTÓRICO.JS - VERSÃO FINAL ATUALIZADA (100% corrigida)
-// ✅ Todos os meses carregam corretamente
-// ✅ Renda de TODOS os meses (incluindo Março) agora aparece
-// ================================================
+// Histórico financeiro
 
-// Data Configuration
+// Dados de configuração
 const MONTH_NAMES = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
@@ -20,7 +16,7 @@ const EXPENSE_CATEGORIES = {
     'Outros': { icon: 'bi-three-dots', color: '#6b7280' }
 };
 
-// Utilities
+// Utilitários
 const Utils = {
     formatCurrency(value) {
         return new Intl.NumberFormat('pt-BR', {
@@ -49,7 +45,7 @@ const Utils = {
     }
 };
 
-// Theme Manager
+// Gerenciador de tema
 const ThemeManager = {
     currentTheme: 'dark',
     init() {
@@ -78,7 +74,7 @@ const ThemeManager = {
     }
 };
 
-// Chart Manager
+// Gerenciador do gráfico
 const ChartManager = {
     chart: null,
     currentYear: new Date().getFullYear(),
@@ -188,7 +184,7 @@ const ChartManager = {
     }
 };
 
-// Months Manager - TOTALMENTE CORRIGIDO
+// Gerenciador de meses
 const MonthsManager = {
     async loadAndRender(year) {
         const loadingOverlay = document.getElementById('loadingOverlay');
@@ -202,7 +198,7 @@ const MonthsManager = {
 
             const dadosAnuais = result.dados_anuais || [];
 
-            // Atualiza gráfico com TODAS as rendas (incluindo Março)
+            // Atualiza o gráfico com as rendas de todos os meses
             ChartManager.chart.data.datasets[0].data = dadosAnuais.map(m => m.gastos || 0);
             ChartManager.chart.data.datasets[1].data = dadosAnuais.map(m => m.receitas || 0);
             ChartManager.chart.update();
@@ -340,10 +336,9 @@ const MonthsManager = {
     }
 };
 
-// Initialize
+// Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     ThemeManager.init();
     ChartManager.init();
     await MonthsManager.loadAndRender(ChartManager.currentYear);
-    console.log('✅ Histórico carregado com TODAS as rendas de todos os meses!');
 });

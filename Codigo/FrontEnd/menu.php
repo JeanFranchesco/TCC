@@ -4,17 +4,17 @@ $show_export_button = true;
 include 'layouts/header.php';
 ?>
 
-<!-- Loading overlay -->
+<!-- Tela de carregamento -->
 <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
     <div class="loading-spinner"></div>
 </div>
 
-<!-- Main dashboard -->
+<!-- Dashboard principal -->
 <main id="mainContent" class="container py-4" role="main">
     <div class="dashboard-container">
         <div class="row g-0 h-100">
 
-            <!-- ===================== SIDEBAR ===================== -->
+            <!-- Barra lateral -->
             <aside
                 id="sidebar"
                 class="col-12 col-lg-3 sidebar"
@@ -23,7 +23,7 @@ include 'layouts/header.php';
 
                 <div class="sidebar-content">
 
-                    <!-- Brand -->
+                    <!-- Marca -->
                     <div class="sidebar-brand">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="brand-icon" viewBox="0 0 16 16" aria-hidden="true">
                             <path fill-rule="evenodd" d="M11 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8m5-4a5 5 0 1 1-10 0 5 5 0 0 1 10 0"/>
@@ -33,7 +33,7 @@ include 'layouts/header.php';
                         <h2 id="sidebarTitle" class="brand-title">Finanças Já</h2>
                     </div>
 
-                    <!-- Nav -->
+                    <!-- Navegação -->
                     <nav class="sidebar-nav" aria-label="Menu principal">
                         <a href="Gastos.php" class="nav-link" data-page="gastos">
                             <i class="bi bi-pie-chart" aria-hidden="true"></i>
@@ -55,7 +55,7 @@ include 'layouts/header.php';
                         </a>
                     </nav>
 
-                    <!-- User -->
+                    <!-- Usuário -->
                     <div class="sidebar-footer">
                         <div class="user-profile" id="userProfileTrigger" role="button" tabindex="0" aria-label="Abrir configurações de perfil">
                             <div class="user-avatar">
@@ -76,11 +76,11 @@ include 'layouts/header.php';
                 </div>
             </aside>
 
-            <!-- ===================== CONTEÚDO PRINCIPAL ===================== -->
+            <!-- Conteúdo principal -->
             <section class="col-12 col-lg-9 main-content" aria-labelledby="dashboardTitle">
                 <div class="content-wrapper">
 
-                    <!-- Header do dashboard -->
+                    <!-- Cabeçalho do dashboard -->
                     <header class="dashboard-header">
                         <div>
                             <h1 id="dashboardTitle" class="dashboard-title">
@@ -101,7 +101,7 @@ include 'layouts/header.php';
                         </button>
                     </header>
 
-                    <!-- ── Cards de estatísticas ── -->
+                    <!-- Cards de estatísticas -->
                     <div class="stats-grid">
 
                         <article class="stat-card stat-card-balance" role="article">
@@ -148,7 +148,7 @@ include 'layouts/header.php';
 
                     </div><!-- /stats-grid -->
 
-                    <!-- ── Gráfico + Legenda ── -->
+                    <!-- Gráfico e legenda -->
                     <div class="charts-grid">
 
                         <!-- Gráfico de rosca -->
@@ -189,7 +189,7 @@ include 'layouts/header.php';
 
                     </div><!-- /charts-grid -->
 
-                    <!-- ── Ações Rápidas ── -->
+                    <!-- Ações rápidas -->
                     <div class="quick-actions">
                         <h3 class="section-title">Ações Rápidas</h3>
                         <div class="actions-grid">
@@ -219,7 +219,7 @@ include 'layouts/header.php';
     </div>
 </main>
 
-<!-- ===================== MODAL — PERFIL ===================== -->
+<!-- Modal de perfil -->
 <div class="profile-modal" id="profileModal" role="dialog" aria-labelledby="profileModalTitle" aria-hidden="true">
     <div class="profile-modal-overlay" id="profileModalOverlay"></div>
     <div class="profile-modal-content">
@@ -409,9 +409,9 @@ include 'layouts/header.php';
 
     </div>
 </div>
-<!-- ===================== FIM MODAL PERFIL ===================== -->
+<!-- Fim do modal de perfil -->
 
-<!-- ===================== MODAL — SENHA ===================== -->
+<!-- Modal de senha -->
 <div class="profile-modal" id="passwordModal" role="dialog" aria-labelledby="passwordModalTitle" aria-hidden="true">
     <div class="profile-modal-overlay" id="passwordModalOverlay"></div>
     <div class="profile-modal-content profile-modal-small">
@@ -473,7 +473,7 @@ include 'layouts/header.php';
 
     </div>
 </div>
-<!-- ===================== FIM MODAL SENHA ===================== -->
+<!-- Fim do modal de senha -->
 
 <?php if (file_exists(__DIR__ . '/chatbot.php')) include 'chatbot.php'; ?>
 
@@ -486,7 +486,7 @@ include 'layouts/header.php';
 <script type="module" src="../Java/menu.js"></script>
 
 <script>
-/* Atalho: botão "Configurações" nas Ações Rápidas também abre o modal */
+/* Abre o modal de perfil pelo botão Configurações das ações rápidas */
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userProfileTrigger2')
         ?.addEventListener('click', () => {

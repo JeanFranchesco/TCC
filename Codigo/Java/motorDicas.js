@@ -1,17 +1,11 @@
-// ======================================================
-// MOTOR DE DICAS
-// Finanças Já v4.0
-// Compatível com IA (Ollama)
-// ======================================================
+// Motor de dicas (IA via Ollama, com dicas locais como alternativa)
 
 import { CONFIG }       from './configuracao.js';
 import { StateManager } from './gerenciadorEstado.js';
 
 export const TipsEngine = {
 
-  // =====================================================
-  // CACHE
-  // =====================================================
+  // Cache
 
 _perfilCognitivo: null,
 _historicoPerfil: [],
@@ -29,9 +23,7 @@ _gastos: [],
 
 _cacheIA: new Map(),
 
-  // =====================================================
-  // INICIALIZAÇÃO
-  // =====================================================
+  // Inicialização
 
 async init() {
 
@@ -55,9 +47,7 @@ await this.carregarGastos();
 
 },
 
-  // =====================================================
-  // CARREGA PERFIL DO BANCO
-  // =====================================================
+  // Carrega o perfil cognitivo
 
   async carregarPerfilCognitivo() {
 
@@ -187,9 +177,7 @@ async carregarGastos() {
 
 },
 
-  // =====================================================
-  // GETTERS
-  // =====================================================
+  // Getters
 
   getPerfil() {
 
@@ -216,9 +204,7 @@ async carregarGastos() {
   },
 
 
-// =====================================================
-// STATUS DOS GASTOS
-// =====================================================
+// Status dos gastos
 
 STATUS: {
 
@@ -248,9 +234,7 @@ STATUS: {
 
 },
 
-// =====================================================
-// LIMITES DAS CATEGORIAS (% DA RENDA)
-// =====================================================
+// Limites das categorias (% da renda)
 
 LIMITES: {
 
@@ -273,9 +257,7 @@ LIMITES: {
 
 },
 
-// =====================================================
-// RETORNA INFORMAÇÕES DO STATUS
-// =====================================================
+// Informações do status
 
 getStatusInfo(status) {
 
@@ -283,9 +265,7 @@ getStatusInfo(status) {
 
 },
 
-// =====================================================
-// RETORNA NÍVEL
-// =====================================================
+// Nível
 
 getNivel(status) {
 
@@ -310,29 +290,10 @@ getNivel(status) {
 
 },
 
-// =====================================================
-// FATOR DE EQUIVALÊNCIA FAMILIAR
-//
-// Mesma renda e mesmo gasto não pesam igual para 1 pessoa
-// e para uma família de 4 — uma casa maior naturalmente
-// gasta mais em termos absolutos (água, alimentação, etc.)
-// sem que isso signifique descontrole financeiro.
-//
-// Usamos a "escala de raiz quadrada" (square-root scale),
-// uma equivalência bem estabelecida em economia doméstica:
-// em vez de dividir o gasto linearmente pelo número de
-// pessoas (o que ignoraria economias de escala — dividir
-// uma conta de água por 4 não reflete a realidade, já que
-// ela não é 4x maior por causa disso), a renda é "esticada"
-// pela raiz quadrada do número de moradores. Isso reconhece
-// que custos como moradia e contas fixas são parcialmente
-// compartilhados entre os moradores.
-//
-// numPessoas = 1  → fator = 1.00 (sem ajuste)
-// numPessoas = 2  → fator ≈ 1.41
-// numPessoas = 4  → fator = 2.00
-// numPessoas = 9  → fator = 3.00
-// =====================================================
+// Fator de equivalência familiar
+// Usa a escala de raiz quadrada: a renda é ajustada pela raiz do número de moradores,
+// já que parte dos custos (moradia, contas) é compartilhada.
+// 1 pessoa = 1,00 | 2 = 1,41 | 4 = 2,00 | 9 = 3,00
 
 getFatorEquivalenciaFamiliar() {
 
@@ -344,9 +305,7 @@ getFatorEquivalenciaFamiliar() {
 
 },
 
-// =====================================================
-// CALCULA STATUS DO GASTO
-// =====================================================
+// Calcula o status do gasto
 
 calculateStatus(categoria, valor, renda) {
 
@@ -381,9 +340,7 @@ calculateStatus(categoria, valor, renda) {
 
 },
 
-  // =====================================================
-  // RETORNA LIMITE DA CATEGORIA
-  // =====================================================
+  // Limite da categoria
 
   getLimiteCategoria(categoria) {
 
@@ -391,9 +348,7 @@ calculateStatus(categoria, valor, renda) {
 
   },
 
-  // =====================================================
-  // VERIFICA SE A CATEGORIA EXISTE
-  // =====================================================
+  // Verifica se a categoria existe
 
   categoriaExiste(categoria) {
 
@@ -402,9 +357,7 @@ calculateStatus(categoria, valor, renda) {
   },
 
 
-  // =====================================================
-  // DICAS INTELIGENTES (IA + FALLBACK)
-  // =====================================================
+  // Dicas inteligentes (IA com alternativa local)
 setRegra503020(regra) {
 
     this._regra503020 = regra;
@@ -467,9 +420,7 @@ setRegra503020(regra) {
 
   },
 
-  // =====================================================
-  // BUSCA DICAS PERSONALIZADAS
-  // =====================================================
+  // Busca dicas personalizadas
 
 async _buscarDicasIA(gasto, nivel) {
 
@@ -530,10 +481,7 @@ gastosMes: this._gastos
   return null;
 
 },
-// ═══════════════════════════════════════════════════════════════
-// BANCO DE DICAS (FALLBACK)
-// Utilizado quando a IA estiver indisponível.
-// ═══════════════════════════════════════════════════════════════
+// Banco de dicas locais (usado quando a IA está indisponível)
 
 tips: {
 
@@ -808,10 +756,7 @@ tips: {
 
 },
 
-// ═══════════════════════════════════════════════════════════════
-// RETORNA DICAS LOCAIS (FALLBACK)
-// Utilizado quando a IA estiver indisponível.
-// ═══════════════════════════════════════════════════════════════
+// Dicas locais (usadas quando a IA está indisponível)
 
 getTips(categoria, nivel = 'nivel1') {
 

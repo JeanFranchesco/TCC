@@ -1,7 +1,4 @@
-// ============================================================================
-// GERENCIADOR DE INTERFACE
-// Finanças Já v4.0
-// ============================================================================
+// Gerenciador de interface
 
 import { CONFIG }       from './configuracao.js';
 import { StateManager } from './gerenciadorEstado.js';
@@ -13,9 +10,7 @@ export const UIManager = {
 
     elements: {},
 
-    // =========================================================================
-    // INICIALIZAÇÃO
-    // =========================================================================
+    // Inicialização
 
     async init() {
 
@@ -27,9 +22,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // CACHE DOS ELEMENTOS
-    // =========================================================================
+    // Cache dos elementos
 
     _cacheElements() {
 
@@ -79,9 +72,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // CARREGAMENTO INICIAL
-    // =========================================================================
+    // Carregamento inicial
 
     async _loadInitialData() {
 
@@ -102,9 +93,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // CARREGA RENDA
-    // =========================================================================
+    // Carrega a renda
 
     async _loadServerRenda() {
 
@@ -148,9 +137,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // ALTERA TEXTO DO BOTÃO
-    // =========================================================================
+    // Texto do botão de renda
 
     _updateSaveBtn(temRenda) {
 
@@ -178,9 +165,7 @@ export const UIManager = {
     },
 
 
-    // =========================================================================
-    // CARREGA GASTOS DO SERVIDOR
-    // =========================================================================
+    // Carrega os gastos do servidor
 
     async _loadServerGastos() {
 
@@ -206,9 +191,7 @@ export const UIManager = {
             const mesServidor = json.mes_referencia ?? null;
             const mesLocal    = state.mesReferencia ?? null;
 
-            // =============================================================
-            // Detecta automaticamente a virada do mês
-            // =============================================================
+            // Detecta a virada do mês
 
             const mudouMes = (
 
@@ -219,10 +202,6 @@ export const UIManager = {
             );
 
             if (mudouMes) {
-
-                console.info(
-                    `[UIManager] Novo mês detectado: ${mesLocal} -> ${mesServidor}`
-                );
 
                 StateManager.update({
 
@@ -244,9 +223,7 @@ export const UIManager = {
 
             }
 
-            // =============================================================
-            // Converte resposta do PHP para o formato interno
-            // =============================================================
+            // Converte a resposta do PHP para o formato interno
 
             const gastos = json.gastos.map(gasto => {
 
@@ -342,9 +319,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // BANNER DE NOVO MÊS
-    // =========================================================================
+    // Banner de novo mês
 
     _showNewMonthBanner(mesReferencia, periodo) {
 
@@ -509,9 +484,7 @@ export const UIManager = {
 
     },
 
-    // =========================================================================
-    // REFRESH GERAL DA INTERFACE
-    // =========================================================================
+    // Atualização geral da interface
 
     refreshUI() {
 
@@ -526,15 +499,11 @@ export const UIManager = {
     },
 
 
-  // ══════════════════════════════════════════════════════════════════
-  // EVENT LISTENERS
-  // ══════════════════════════════════════════════════════════════════
+  // Eventos
   _attachEventListeners() {
     const el = this.elements;
 
-    // -----------------------------
     // Renda
-    // -----------------------------
     el.saveRendaBtn?.addEventListener('click', () => this._saveRenda());
 
     el.rendaInput?.addEventListener('keypress', e => {
@@ -544,17 +513,13 @@ export const UIManager = {
       }
     });
 
-    // -----------------------------
     // Cadastro de gasto
-    // -----------------------------
     el.gastoForm?.addEventListener('submit', e => {
       e.preventDefault();
       this._addGasto();
     });
 
-    // -----------------------------
     // Mora sozinho
-    // -----------------------------
     el.sozinhaSim?.addEventListener('change', () => {
       StateManager.update({
         viveSozinho: true,
@@ -588,9 +553,7 @@ export const UIManager = {
       this._updateRegra503020();
     });
 
-    // -----------------------------
-    // Atualiza regra quando renda muda
-    // -----------------------------
+    // Atualiza a regra quando a renda muda
     el.rendaInput?.addEventListener('input', () => {
       const valor = parseFloat(el.rendaInput.value);
 
@@ -602,9 +565,7 @@ export const UIManager = {
   },
 
 
-  // ══════════════════════════════════════════════════════════════════
-  // SALVAR RENDA
-  // ══════════════════════════════════════════════════════════════════
+  // Salvar renda
   async _saveRenda() {
     const el = this.elements;
     const novaRenda = parseFloat(el.rendaInput?.value);
@@ -723,9 +684,7 @@ export const UIManager = {
 
 
 
-// ══════════════════════════════════════════════════════════════════
-// VALIDAÇÃO DE FORMULÁRIO — AVISO + FOCO
-// ══════════════════════════════════════════════════════════════════
+// Validação do formulário (aviso e foco)
 _focusWarn(mensagem, elemento) {
 
   Utils.showToast(mensagem, 'warning');
@@ -752,11 +711,7 @@ _focusWarn(mensagem, elemento) {
 
 
 
-// ══════════════════════════════════════════════════════════════════
-// LIMPAR FORMULÁRIO DE NOVO GASTO
-// Chamado depois que um gasto é salvo com sucesso, para deixar o
-// formulário pronto para o próximo lançamento sem recarregar a página.
-// ══════════════════════════════════════════════════════════════════
+// Limpa o formulário após salvar um gasto, deixando-o pronto para o próximo lançamento
 _resetForm() {
 
   const el = this.elements;
@@ -803,9 +758,7 @@ _resetForm() {
 
 
 
-// ══════════════════════════════════════════════════════════════════
-// ADICIONAR GASTO
-// ══════════════════════════════════════════════════════════════════
+// Adicionar gasto
 async _addGasto() {
   const el = this.elements;
 
@@ -948,9 +901,7 @@ async _addGasto() {
 
 
 
-// ══════════════════════════════════════════════════════════════════
-// RENDERIZAR LISTA DE GASTOS
-// ══════════════════════════════════════════════════════════════════
+// Lista de gastos
 _renderList() {
 
     const tabela = this.elements.listaGastosEl;
@@ -1184,9 +1135,7 @@ _renderList() {
   },
 
 
-  // ══════════════════════════════════════════════════════════════════
-  // MODAL DE DICAS
-  // ══════════════════════════════════════════════════════════════════
+  // Modal de dicas
    async _showTipsModal(id) {
     const { gastos } = StateManager.get();
     const gasto = gastos.find(g => Number(g.id_gasto) === Number(id));
@@ -1325,9 +1274,7 @@ _renderList() {
   },
 
 
-  // ══════════════════════════════════════════════════════════════════
-  // EDITAR GASTO
-  // ══════════════════════════════════════════════════════════════════
+  // Editar gasto
   _openEditModal(id) {
 
     const { gastos } = StateManager.get();
@@ -1426,9 +1373,7 @@ _renderList() {
   },
 
 
-  // ══════════════════════════════════════════════════════════════════
-  // SALVAR EDIÇÃO
-  // ══════════════════════════════════════════════════════════════════
+  // Salvar edição
   async _saveEdit(modal) {
 
     const id = Number(Utils.$('#editId')?.value);
@@ -1595,9 +1540,7 @@ _renderList() {
 
   },
 
-  // ══════════════════════════════════════════════════════════════════
-  // REMOVER GASTO
-  // ══════════════════════════════════════════════════════════════════
+  // Remover gasto
   async _removeItem(id) {
 
     const state = StateManager.get();
@@ -1676,9 +1619,7 @@ _renderList() {
 
   },
 
-  // ══════════════════════════════════════════════════════════════════
-  // REGRA 50/30/20
-  // ══════════════════════════════════════════════════════════════════
+  // Regra 50/30/20
 
   _updateViveSozinhoUI() {
 
@@ -1719,13 +1660,8 @@ _renderList() {
 
   },
 
-  // ══════════════════════════════════════════════════════════════════
-  // CLASSIFICAÇÃO DE FAIXAS (ótimo / atenção / crítico)
-  // Fonte única de verdade para os limites do 50/30/20.
-  // Antes esses limites estavam repetidos em 4 lugares diferentes
-  // (barra de necessidades, barra de desejos, barra de poupança e
-  // no cálculo do status geral) — agora é um só lugar.
-  // ══════════════════════════════════════════════════════════════════
+  // Classificação de faixas (ótimo, atenção, crítico)
+  // Fonte única dos limites do 50/30/20
 
   _TIER_CORES: {
     otimo: '#51cf66',
@@ -1891,9 +1827,7 @@ _renderList() {
 
   },
 
-  // ══════════════════════════════════════════════════════════════════
-  // TOTAIS
-  // ══════════════════════════════════════════════════════════════════
+  // Totais
 
   _updateTotals() {
 

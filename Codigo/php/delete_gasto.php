@@ -3,9 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
-// ---------- CONFIGURAÇÕES ----------
 $connPath = __DIR__ . '/../../Conexao/conn.php';
-// ------------------------------------
 
 if (!is_file($connPath)) {
     http_response_code(500);
@@ -28,7 +26,7 @@ if (!($conn instanceof mysqli)) {
     exit;
 }
 
-// Obter usuário logado
+// Usuário logado
 $id_usuario = $_SESSION['user_id'] ?? $_SESSION['id_usuario'] ?? null;
 $id_usuario = $id_usuario ? intval($id_usuario) : 0;
 
@@ -38,7 +36,7 @@ if ($id_usuario <= 0) {
     exit;
 }
 
-// Obter id do gasto
+// Id do gasto
 $id_gasto = 0;
 
 if (isset($_GET['id'])) {

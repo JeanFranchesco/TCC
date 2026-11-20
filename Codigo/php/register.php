@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Caminho para o arquivo de conexão (ajuste se necessário)
+// Caminho do arquivo de conexão
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     http_response_code(500);
@@ -32,12 +32,12 @@ if (!($conn instanceof mysqli)) {
     exit;
 }
 
-// Lê dados POST de forma segura
+// Lê os dados do POST
 $email = trim((string) ($_POST['email'] ?? ''));
 $senha = (string) ($_POST['senha'] ?? '');
 $senha_confirm = (string) ($_POST['senha_confirm'] ?? '');
 
-// Validações básicas
+// Validações
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Email inválido']);
@@ -56,11 +56,11 @@ if ($senha !== $senha_confirm) {
     exit;
 }
 
-// Debug control (apenas em dev)
+// Debug (APP_DEBUG; desligado por padrão)
 $debug = filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN);
 
 try {
-    // Verifica se já existe email
+    // Verifica se o email já existe
     $stmt = $conn->prepare("SELECT id_usuario FROM usuarios WHERE email = ? LIMIT 1");
     if ($stmt === false) {
         throw new RuntimeException('Erro no prepare (select): ' . $conn->error);
@@ -77,7 +77,7 @@ try {
     }
     $stmt->close();
 
-    // Insere usuário com hash seguro
+    // Insere o usuário com a senha em hash
     $hash = password_hash($senha, PASSWORD_DEFAULT);
     $stmt = $conn->prepare("INSERT INTO usuarios (email, senha, status, role, criado_em) VALUES (?, ?, 'ativo', 'user', NOW())");
     if ($stmt === false) {

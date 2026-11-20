@@ -8,13 +8,13 @@
     <meta name="theme-color" content="#f8f9fb" media="(prefers-color-scheme: light)">
     <title>Finanças Já — Controle suas finanças com inteligência</title>
     
-    <!-- Fonts -->
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon">
 
-    <!-- External CSS -->
+    <!-- CSS externo -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -22,7 +22,7 @@
 <body>
     <a class="skip-link" href="#main">Pular para o conteúdo principal</a>
 
-    <!-- Navbar -->
+    <!-- Barra de navegação -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -54,7 +54,7 @@
         </div>
     </nav>
 
-    <!-- Hero -->
+    <!-- Seção principal -->
     <main id="main" class="hero">
         <div class="container">
             <div class="hero-content">
@@ -77,7 +77,7 @@
         </div>
     </main>
 
-    <!-- Stats -->
+    <!-- Estatísticas -->
     <section class="stats-section">
         <div class="container">
             <div class="stats-grid">
@@ -97,7 +97,7 @@
         </div>
     </section>
 
-    <!-- Benefits -->
+    <!-- Benefícios -->
     <section id="benefits" class="benefits">
         <div class="container">
             <div class="section-header">
@@ -156,7 +156,7 @@
         </div>
     </section>
 
-    <!-- Charts -->
+    <!-- Gráficos -->
     <section class="charts-section">
         <div class="container">
             <div class="section-header">
@@ -186,7 +186,7 @@
         </div>
     </section>
 
-    <!-- CTA -->
+    <!-- Chamada para ação -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
@@ -200,7 +200,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Rodapé -->
     <footer>
         <div class="container">
             <small>

@@ -1,8 +1,4 @@
-       /* ============================================
-           Finanças Já - Histórico
-           ============================================ */
-
-        /* === CSS VARIABLES === */
+/* Variáveis */
         :root {
             --color-bg-primary: #0a0a0b;
             --color-bg-secondary: #0f0f11;
@@ -109,7 +105,7 @@
             transition: background-color var(--transition-base);
         }
 
-        /* Loading */
+        /* Carregamento */
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -139,7 +135,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Header */
+        /* Cabeçalho */
         .top-header {
             background: var(--color-surface);
             border-bottom: 1px solid var(--color-border);
@@ -204,7 +200,7 @@
             color: white;
         }
 
-        /* Main Content */
+        /* Conteúdo principal */
         .main-content {
             padding: var(--spacing-2xl);
             animation: fadeInUp 600ms var(--transition-base);
@@ -244,7 +240,7 @@
             color: var(--color-text-secondary);
         }
 
-        /* Year Selector */
+        /* Seletor de ano */
         .year-selector {
             display: flex;
             align-items: center;
@@ -281,7 +277,7 @@
             text-align: center;
         }
 
-        /* Chart Card */
+        /* Card do gráfico */
         .chart-card {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
@@ -316,7 +312,7 @@
             height: 400px;
         }
 
-        /* Months Grid */
+        /* Grade de meses */
         .months-section {
             margin-bottom: var(--spacing-2xl);
         }
@@ -584,7 +580,7 @@
             color: var(--color-accent-primary);
         }
 
-        /* Responsive */
+        /* Responsividade */
         @media (max-width: 768px) {
             .main-content {
                 padding: var(--spacing-lg);

@@ -1,9 +1,4 @@
-/* ========================================
-   FINANÇAS JÁ - GASTOS v3.2.0
-   Sistema de Gestão Financeira Pessoal
-   ======================================== */
-
-/* ========== VARIÁVEIS CSS ========== */
+/* Variáveis */
 :root {
   --bg-primary: #0a0a0b;
   --bg-secondary: #0f0f11;
@@ -63,7 +58,7 @@
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* ── Tema Claro ─────────────────────────────────────────────── */
+/* Tema claro */
 html.light-theme {
   --bg-primary: #f8f9fb;
   --bg-secondary: #ffffff;
@@ -98,7 +93,7 @@ html.light-theme {
   color-scheme: light;
 }
 
-/* ========== RESET E BASE ========== */
+/* Reset e base */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -122,7 +117,7 @@ body {
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 
-/* ========== ACESSIBILIDADE ========== */
+/* Acessibilidade */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -149,7 +144,7 @@ body {
   border: 0 !important;
 }
 
-/* ========== HEADER ========== */
+/* Cabeçalho */
 .top-header {
   background: var(--color-surface);
   border-bottom: 1px solid var(--border-color);
@@ -205,7 +200,7 @@ html.light-theme .top-header { box-shadow: var(--shadow-sm); }
 }
 .btn-ghost i { font-size: 1rem; }
 
-/* ========== DASHBOARD CARD ========== */
+/* Card do dashboard */
 .dashboard-card {
   max-width: 1200px;
   background: linear-gradient(180deg, var(--glass-effect), rgba(0, 0, 0, 0.06));
@@ -222,7 +217,7 @@ html.light-theme .dashboard-card { background: var(--panel-primary); box-shadow:
 
 .content-wrapper { padding: var(--spacing-xl); }
 
-/* ========== TIPOGRAFIA ========== */
+/* Tipografia */
 .greeting {
   font-size: 2rem;
   font-weight: 700;
@@ -239,7 +234,7 @@ html.light-theme .greeting { color: var(--color-orange); }
 html.light-theme .info-text { color: var(--text-tertiary); }
 h3, h5 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.3px; line-height: 1.4; }
 
-/* ========== STAT CARDS ========== */
+/* Cards de estatísticas */
 .stat-card {
   background: linear-gradient(135deg, var(--glass-effect), rgba(0, 0, 0, 0.02));
   border-radius: var(--radius-lg);
@@ -292,7 +287,7 @@ html.light-theme .stat-card:hover { background: var(--panel-secondary); }
 }
 html.light-theme .stat-value { color: var(--color-orange); }
 
-/* ========== CONTENT / CHART CARDS ========== */
+/* Cards de conteúdo e gráfico */
 .content-card, .chart-card {
   background: linear-gradient(135deg, var(--glass-effect), rgba(0, 0, 0, 0.03));
   border-radius: var(--radius-lg);
@@ -306,7 +301,7 @@ html.light-theme .stat-value { color: var(--color-orange); }
 html.light-theme .content-card,
 html.light-theme .chart-card { background: var(--panel-primary); box-shadow: var(--shadow-sm); }
 
-/* ========== FORMULÁRIOS ========== */
+/* Formulários */
 .form-control, .form-select {
   height: 46px;
   padding: 0 var(--spacing-md);
@@ -338,7 +333,7 @@ input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-/* ========== BOTÕES ========== */
+/* Botões */
 .btn {
   height: 46px;
   padding: 0 var(--spacing-md);
@@ -408,12 +403,12 @@ html.light-theme .btn-outline-secondary:hover:not(:disabled) {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 .btn-group .btn { height: 46px; padding: 0 var(--spacing-md); }
 
-/* ========== INFO ROW ========== */
+/* Linha de informações */
 .info-row { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
 .info-row label, .info-row legend { margin: 0; font-weight: 600; font-size: 0.95rem; }
 #numPessoas { width: 200px; }
 
-/* ========== GRÁFICO ========== */
+/* Gráfico */
 .chart-wrapper {
   width: 100%;
   position: relative;
@@ -446,7 +441,7 @@ html.light-theme .chart-wrapper { background: var(--panel-secondary); }
 }
 .chart-empty p { margin: 0; font-size: 1.1rem; font-weight: 500; }
 
-/* ========== ESTATÍSTICAS POR CATEGORIA ========== */
+/* Estatísticas por categoria */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -485,7 +480,7 @@ html.light-theme .chart-wrapper { background: var(--panel-secondary); }
 html.light-theme .stat-item { background: var(--panel-secondary); border-color: var(--border-color); }
 html.light-theme .stat-item:hover { background: #fff; }
 
-/* ========== TABELA ========== */
+/* Tabela */
 .table-responsive-card { overflow-x: auto; border-radius: var(--radius-md); -webkit-overflow-scrolling: touch; }
 
 .data-table {
@@ -543,7 +538,7 @@ html.light-theme .data-table tbody td { border-bottom-color: var(--border-color)
 html.light-theme .data-table tbody tr:nth-child(odd) { background: var(--panel-secondary); }
 html.light-theme .data-table tbody tr:hover { background: rgba(255, 122, 0, 0.08); }
 
-/* ========== BADGES E STATUS ========== */
+/* Badges e status */
 .badge {
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
@@ -567,12 +562,12 @@ html.light-theme .data-table tbody tr:hover { background: rgba(255, 122, 0, 0.08
 }
 .status-badge:hover { transform: scale(1.2) rotate(10deg); box-shadow: var(--shadow-md); }
 
-/* ========== BOTÕES DE AÇÃO NA TABELA ========== */
+/* Botões de ação da tabela */
 .data-table .btn-sm { height: 32px; width: 32px; min-width: 32px; flex-shrink: 0; }
 .data-table .btn-sm i { font-size: 0.9rem; line-height: 1; }
 .data-table .btn-sm:hover { transform: translateY(-2px) scale(1.05); }
 
-/* ========== DESCRIÇÃO CLICÁVEL ========== */
+/* Descrição clicável */
 .expense-description {
   cursor: pointer;
   color: var(--text-secondary);
@@ -586,7 +581,7 @@ html.light-theme .data-table tbody tr:hover { background: rgba(255, 122, 0, 0.08
 .expense-description:hover { color: var(--color-orange); border-bottom-color: var(--color-orange); transform: translateX(2px); }
 html.light-theme .expense-description { color: var(--text-secondary); border-bottom-color: rgba(255, 122, 0, 0.4); }
 
-/* ========== MODAL ========== */
+/* Modal */
 .modal-content {
   background: var(--panel-primary);
   border: 2px solid var(--border-color);
@@ -603,13 +598,13 @@ html.light-theme .modal-content { background: var(--panel-primary); border-color
 html.light-theme .modal-header,
 html.light-theme .modal-footer { border-color: var(--border-color); }
 
-/* ========== TOAST ========== */
+/* Toast */
 .toast { background: var(--panel-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
 .toast-header { background: rgba(255, 145, 0, 0.1); border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
 html.light-theme .toast { background: #fff; color: var(--text-primary); }
 html.light-theme .toast-header { background: rgba(255, 122, 0, 0.1); }
 
-/* ========== ANIMAÇÕES ========== */
+/* Animações */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0);    }
@@ -621,7 +616,7 @@ html.light-theme .toast-header { background: rgba(255, 122, 0, 0.1); }
 .stat-card:nth-child(2) { animation-delay: 0.1s;  }
 .stat-card:nth-child(3) { animation-delay: 0.15s; }
 
-/* ========== UTILITÁRIOS ========== */
+/* Utilitários */
 .border-danger { border-color: var(--color-red) !important; box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15) !important; }
 ::selection { background: var(--color-orange); color: #000; }
 :focus-visible { outline: 2px solid var(--color-orange); outline-offset: 2px; }
@@ -639,7 +634,7 @@ html.light-theme .toast-header { background: rgba(255, 122, 0, 0.1); }
   animation: spin 0.6s linear infinite;
 }
 
-/* ========== REGRA 50/30/20 — Redesign ========== */
+/* Regra 50/30/20 */
 .regra-card {
   background: linear-gradient(135deg, rgba(255,145,0,.06), rgba(0,0,0,.04));
   border: 1px solid var(--border-color-strong);
@@ -740,7 +735,7 @@ html.light-theme .regra-bar-track { background: rgba(0,0,0,.08); }
   min-width: 4px;
 }
 
-/* Meta e descrição — contraste garantido em ambos os temas */
+/* Meta e descrição */
 .regra-meta {
   font-size: 0.82rem;
   font-weight: 600;
@@ -756,7 +751,7 @@ html.light-theme .regra-bar-track { background: rgba(0,0,0,.08); }
 html.light-theme .regra-meta { color: var(--text-secondary); }
 html.light-theme .regra-desc { color: var(--text-muted);     }
 
-/* ========== RESPONSIVIDADE ========== */
+/* Responsividade */
 @media (max-width: 992px) {
   .dashboard-card { max-width: 94vw; margin: var(--spacing-md) auto; }
   .content-wrapper { padding: var(--spacing-lg); }
@@ -777,7 +772,7 @@ html.light-theme .regra-desc { color: var(--text-muted);     }
   .data-table .btn-sm i { font-size: 0.85rem; }
   .data-table td.actions { gap: 0.35rem; padding: 0.75rem var(--spacing-sm); width: 90px; }
 
-  /* Regra 50/30/20 — empilha verticalmente no mobile */
+  /* Regra 50/30/20: empilha no mobile */
   .regra-cols { grid-template-columns: 1fr; }
   .regra-divider { width: 100% !important; height: 1px !important; margin: var(--spacing-lg) 0 !important; }
   .regra-col { padding: 0; }

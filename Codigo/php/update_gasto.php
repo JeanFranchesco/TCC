@@ -7,10 +7,7 @@ session_start();
 /* Tipos de gasto aceitos pelo app (o resto vira 'variavel') */
 const TIPOS_VALIDOS = ['fixo', 'variavel'];
 
-/* ================================================================
-   Função auxiliar: responde em JSON e encerra a execução.
-   Fecha a conexão (com rollback opcional) antes de sair.
-================================================================ */
+/* Responde em JSON e encerra a execução (fecha a conexão antes de sair) */
 function responder(?mysqli $conn, int $status, array $payload, bool $rollback = false): void
 {
     if ($conn instanceof mysqli) {
@@ -25,24 +22,15 @@ function responder(?mysqli $conn, int $status, array $payload, bool $rollback = 
     exit;
 }
 
-/* ================================================================
-   Função auxiliar: valida se a string é uma data real no formato
-   Y-m-d (rejeita coisas como "2024-02-31" ou lixo qualquer).
-================================================================ */
+/* Valida se a string é uma data real no formato Y-m-d */
 function dataValida(string $data): bool
 {
     $d = DateTime::createFromFormat('Y-m-d', $data);
     return $d !== false && $d->format('Y-m-d') === $data;
 }
 
-/* ================================================================
-   Função auxiliar: busca categoria por nome ou cria uma nova.
-   Mesma lógica usada em gastos.php (case-insensitive, filtrando
-   por tipo 'despesa'), para as duas rotas nunca criarem categorias
-   duplicadas por causa de maiúscula/minúscula.
-
-   Deve sempre ser chamada DENTRO da transação do chamador.
-================================================================ */
+/* Busca a categoria por nome (sem diferenciar maiúsculas) ou cria uma nova.
+   Deve ser chamada dentro da transação do chamador. */
 function buscarOuCriarCategoria(mysqli $conn, string $nome, string $descricao = ''): int
 {
     /* 1) Busca pelo nome (case-insensitive) */
@@ -93,9 +81,7 @@ function buscarOuCriarCategoria(mysqli $conn, string $nome, string $descricao = 
     return $novo_id;
 }
 
-/* ================================================================
-   1) Conexão
-================================================================ */
+/* 1) Conexão */
 $connPath = __DIR__ . '/../../Conexao/conn.php';
 if (!is_file($connPath)) {
     responder(null, 500, ['success' => false, 'message' => 'Arquivo de conexão não encontrado']);
@@ -112,9 +98,7 @@ if (!($conn instanceof mysqli)) {
     responder(null, 500, ['success' => false, 'message' => 'Conexão inválida']);
 }
 
-/* ================================================================
-   2) Autenticação
-================================================================ */
+/* 2) Autenticação */
 $id_usuario = null;
 if (!empty($_SESSION['user_id'])) {
     $id_usuario = intval($_SESSION['user_id']);
@@ -126,9 +110,7 @@ if (empty($id_usuario)) {
     responder($conn, 401, ['success' => false, 'message' => 'Usuário não autenticado']);
 }
 
-/* ================================================================
-   3) Receber e validar JSON
-================================================================ */
+/* 3) Receber e validar JSON */
 $raw   = file_get_contents('php://input');
 $dados = json_decode($raw, true);
 
@@ -162,13 +144,8 @@ if ($data_gasto === '' || !dataValida($data_gasto)) {
     responder($conn, 400, ['success' => false, 'message' => 'Data do gasto inválida']);
 }
 
-/* ================================================================
-   4) Atualizar gasto + resolver categoria (tudo na mesma transação)
-
-   Assim como em gastos.php, a categoria só é resolvida depois de
-   abrir a transação: se o UPDATE falhar depois, uma categoria nova
-   criada aqui é desfeita junto pelo rollback.
-================================================================ */
+/* 4) Atualizar o gasto e resolver a categoria (na mesma transação)
+   A categoria é resolvida após abrir a transação, para ser desfeita junto em caso de falha. */
 if (!$conn->begin_transaction()) {
     error_log('update_gasto.php begin_transaction error: ' . $conn->error);
     responder($conn, 500, ['success' => false, 'message' => 'Erro ao iniciar transação']);
@@ -192,7 +169,9 @@ try {
     }
     $checkStmt->close();
 
-    /* --- Resolver categoria_id -------------------------------- */
+    /* Resolver categoria_id
+       Prioridade: (a) categoria_id numérico existente no banco;
+       (b) nome em categoria_nova ou categoria (busca ou cria). */
     $categoria_id = isset($dados['categoria_id']) ? intval($dados['categoria_id']) : null;
 
     if ($categoria_id === 0 || $categoria_id === null) {
@@ -230,7 +209,7 @@ try {
         throw new RuntimeException('Não foi possível determinar a categoria');
     }
 
-    /* --- Atualiza o gasto --------------------------------------- */
+    /* Atualiza o gasto */
     $sql = "UPDATE gastos
             SET categoria_id = ?, descricao = ?, valor = ?, tipo = ?,
                 metodo_pagamento = ?, data_gasto = ?, recorrente = ?,
@@ -263,8 +242,7 @@ try {
     }
 
     if ($stmt->affected_rows === 0) {
-        /* Pode ser porque nada mudou (dados idênticos) — não é necessariamente erro,
-           mas mantemos o comportamento original de tratar como falha explícita. */
+        /* Também ocorre quando os dados não mudaram; tratado como falha */
         throw new RuntimeException('Nenhum gasto foi atualizado');
     }
 
@@ -286,7 +264,7 @@ try {
     responder($conn, 400, ['success' => false, 'message' => $e->getMessage()], true);
 
 } catch (Throwable $e) {
-    /* Erros internos: log detalhado no servidor, mensagem genérica pro cliente */
+    /* Erros internos: log detalhado no servidor e mensagem genérica para o cliente */
     error_log('update_gasto.php error: ' . $e->getMessage());
     responder($conn, 500, ['success' => false, 'message' => 'Erro ao atualizar gasto'], true);
 }

@@ -1,7 +1,7 @@
-        (() => {
+(() => {
             'use strict';
 
-            // Theme Manager
+            // Gerenciador de tema
             const ThemeManager = {
                 currentTheme: 'dark',
                 toggle: null,
@@ -43,7 +43,7 @@
                 }
             };
 
-            // Stats Counter Animation
+            // Animação dos contadores
             const StatsCounter = {
                 init() {
                     const stats = document.querySelectorAll('.stat-value[data-count]');
@@ -84,7 +84,7 @@
                 }
             };
 
-            // Chart Manager
+            // Gerenciador de gráficos
             const ChartManager = {
                 semanalChart: null,
                 mensalChart: null,
@@ -127,7 +127,7 @@
                         }
                     };
 
-                    // Gráfico Semanal
+                    // Gráfico semanal
                     const ctxSemanal = document.getElementById('graficoSemanal')?.getContext('2d');
                     if (ctxSemanal) {
                         this.semanalChart = new Chart(ctxSemanal, {
@@ -145,7 +145,7 @@
                         });
                     }
 
-                    // Gráfico Mensal
+                    // Gráfico mensal
                     const ctxMensal = document.getElementById('graficoMensal')?.getContext('2d');
                     if (ctxMensal) {
                         this.mensalChart = new Chart(ctxMensal, {
@@ -181,13 +181,13 @@
                 }
             };
 
-            // Year Footer
+            // Ano no rodapé
             const yearElement = document.getElementById('year');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
             }
 
-            // Smooth Scroll for Anchor Links
+            // Rolagem suave para links âncora
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     const href = this.getAttribute('href');
@@ -204,11 +204,10 @@
                 });
             });
 
-            // Initialize Everything
+            // Inicialização
             document.addEventListener('DOMContentLoaded', () => {
                 ThemeManager.init();
                 StatsCounter.init();
                 ChartManager.init();
-                console.log('✅ Finanças Já initialized');
             });
         })();

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#f8f9fb" media="(prefers-color-scheme: light)">
     <title>Login | Finanças</title>
 
-    <!-- Fonts -->
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="../CSS/login.css">
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Barra de navegação -->
     <nav class="navbar">
         <div class="container">
             <a class="navbar-brand" href="../index.php">
@@ -40,11 +40,11 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Conteúdo principal -->
     <div class="page-center">
         <div class="login-container">
             <div class="row g-0">
-                <!-- Left Side -->
+                <!-- Lado esquerdo -->
                 <div class="col-12 col-md-6 login-left">
                     <div class="login-left-content">
                         <div class="feature-icon">
@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                <!-- Right Side -->
+                <!-- Lado direito -->
                 <div class="col-12 col-md-6 login-right">
                     <div class="logo-section">
                         <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -81,7 +81,7 @@
                     </div>
 
 
-          <!-- Login Form (envio via JS) -->
+          <!-- Formulário de login (enviado via JS) -->
           <form id="loginForm" class="form-wrapper" novalidate>
             <div id="loginFeedback" class="visually-hidden" role="alert" aria-live="polite"></div>
 
@@ -114,7 +114,7 @@
             <a href="#" class="small-link">Esqueceu sua senha?</a>
           </form>
 
-<!-- Register Form (envio via JS) -->
+<!-- Formulário de cadastro (enviado via JS) -->
           <form id="registerForm" class="form-wrapper d-none" novalidate>
             <h4 class="form-title">Criar Conta</h4>
             <div id="registerFeedback" class="visually-hidden" role="alert" aria-live="polite"></div>

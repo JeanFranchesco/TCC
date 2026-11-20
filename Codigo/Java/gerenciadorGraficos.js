@@ -1,5 +1,4 @@
-// ========== GERENCIADOR DE GRÁFICOS ==========
-// Finanças Já v3.2.0
+// Gerenciador de gráficos
 
 import { CONFIG }       from './configuracao.js';
 import { StateManager } from './gerenciadorEstado.js';
@@ -9,7 +8,7 @@ export const ChartManager = {
   chart : null,
   _hidden: {},   // slug → true quando a fatia está oculta
 
-  // ── Soma gastos agrupados por slug ────────────────────────────────
+  // Soma os gastos por categoria
   getCategoryTotals() {
     const { gastos } = StateManager.get();
     const totals = {};
@@ -24,7 +23,7 @@ export const ChartManager = {
     return document.documentElement.classList.contains('light-theme');
   },
 
-  // ── Render principal ──────────────────────────────────────────────
+  // Renderização principal
   render() {
     const chartContainer  = Utils.$('#chartContainer');
     const categoryStatsEl = Utils.$('#categoryStats');
@@ -46,7 +45,7 @@ export const ChartManager = {
       return;
     }
 
-    // Remove slugs que já não existem do estado hidden
+    // Remove do mapa de ocultos as categorias que não existem mais
     Object.keys(this._hidden).forEach(s => {
       if (!categories.includes(s)) delete this._hidden[s];
     });
@@ -73,7 +72,7 @@ export const ChartManager = {
 
     this._destroyChart();
 
-    // ── Plugin: label central animado ─────────────────────────────────
+    // Plugin: texto central
     const self = this;
 
     const centerLabelPlugin = {
@@ -102,7 +101,7 @@ export const ChartManager = {
       }
     };
 
-    // ── Plugin: desenha linha de strikethrough sobre legendas ocultas ─
+    // Plugin: risca as legendas ocultas
     const strikethroughPlugin = {
       id: 'strikethroughLegend',
       afterDraw(chart) {
@@ -223,7 +222,7 @@ export const ChartManager = {
     this._updateCategoryStats(totals, total, categoryStatsEl);
   },
 
-  // ── Cards de estatísticas abaixo do gráfico ──────────────────────
+  // Cards de estatísticas abaixo do gráfico
   _updateCategoryStats(totals, total, containerEl) {
     if (!containerEl) return;
 
@@ -251,7 +250,7 @@ export const ChartManager = {
     containerEl.style.display = 'grid';
   },
 
-  // ── Destroi com segurança ─────────────────────────────────────────
+  // Destrói o gráfico com segurança
   _destroyChart() {
     if (this.chart) {
       this.chart.destroy();

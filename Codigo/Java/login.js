@@ -2,31 +2,23 @@
   'use strict';
 
   /**
-   * login.js
-   * - Gerencia formulário de login/registro (frontend)
-   * - Boas práticas aplicadas: validação no cliente, timeouts em fetch,
-   *   feedback construído via DOM (evita innerHTML com conteúdo de servidor)
-   * - Possíveis melhorias: hCaptcha/recaptcha no register, limitar tentativas
+   * Formulários de login e cadastro (frontend)
    */
 
-  /* =========================
-     CONFIG
-  ========================= */
+  /* Configuração */
   const API_BASE = '/TCC/Codigo/php';
   const REDIRECT_OK = 'menu.php';
   const THEME_KEY = 'financas-theme';
   const REQUEST_TIMEOUT = 8000; // ms
 
-  /* =========================
-     HELPERS
-  ========================= */
-  // Pequena helper para obter elemento por id — preferir clareza em código
+  /* Funções auxiliares */
+  // Atalho para buscar elemento por id
   const qs = id => document.getElementById(id);
 
-  // Validação simples de e-mail (cliente): aceitará a maioria dos e-mails válidos
+  // Validação simples de e-mail no cliente
   const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Parse seguro de JSON — evita lançar exceptions no fluxo de tratamento
+  // Converte JSON sem lançar exceção
   const parseJsonSafe = text => {
     try {
       return JSON.parse(text);
@@ -35,9 +27,7 @@
     }
   };
 
-  /* =========================
-     THEME MANAGER
-  ========================= */
+  /* Gerenciador de tema */
   const ThemeManager = {
     current: 'dark',
     toggle: null,
@@ -66,9 +56,7 @@
     }
   };
 
-  /* =========================
-     FORM MANAGER
-  ========================= */
+  /* Gerenciador de formulários */
   const FormManager = {
     loginForm: null,
     registerForm: null,
@@ -87,7 +75,7 @@
       this.initFromURL();
     },
 
-    // feedback seguro: constrói DOM em vez de innerHTML com conteúdo do servidor
+    // Monta o DOM em vez de usar innerHTML com conteúdo do servidor
     feedback(el, msg, type = 'error') {
       if (!el) return;
       el.innerHTML = '';
@@ -148,7 +136,7 @@
         });
         clearTimeout(id);
         const text = await res.text();
-        // tenta parse seguro
+        // Tenta converter a resposta em JSON
         const json = parseJsonSafe(text);
         return { ok: res.ok, status: res.status, text, json };
       } catch (err) {
@@ -158,7 +146,7 @@
     },
 
     bindSubmit() {
-      /* ===== LOGIN ===== */
+      /* Login */
       this.loginForm?.addEventListener('submit', async e => {
         e.preventDefault();
 
@@ -184,8 +172,6 @@
 
         try {
           const result = await this.postForm(`${API_BASE}/login.php`, fd);
-          // debug leve no console (não expõe senha)
-          console.debug('login response status:', result.status);
 
           if (result.json && result.json.success) {
             this.feedback(this.loginFeedback, result.json.message || 'Login realizado!', 'success');
@@ -194,14 +180,14 @@
             return;
           }
 
-          // se servidor retornou JSON com mensagem, exibir; senão, usar texto bruto
+          // Exibe a mensagem do servidor, se houver
           if (result.json && result.json.message) {
             this.feedback(this.loginFeedback, result.json.message);
           } else if (!result.ok) {
-            // status não OK e sem JSON
+            // Resposta com erro e sem JSON
             this.feedback(this.loginFeedback, `Erro ${result.status}: ${result.text || 'Resposta inválida do servidor.'}`);
           } else {
-            // ok mas success false
+            // Resposta OK, mas sem sucesso
             const parsed = result.json || {};
             this.feedback(this.loginFeedback, parsed.message || 'Email ou senha incorretos.');
           }
@@ -215,7 +201,7 @@
         }
       });
 
-      /* ===== REGISTER ===== */
+      /* Cadastro */
       this.registerForm?.addEventListener('submit', async e => {
         e.preventDefault();
 
@@ -246,7 +232,6 @@
 
         try {
           const result = await this.postForm(`${API_BASE}/register.php`, fd);
-          console.debug('register response status:', result.status);
 
           if (result.json && result.json.success) {
             this.feedback(this.registerFeedback, result.json.message || 'Conta criada com sucesso!', 'success');
@@ -278,13 +263,10 @@
     }
   };
 
-  /* =========================
-     INIT
-  ========================= */
+  /* Inicialização */
   document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
     FormManager.init();
-    console.log('✅ Login carregado com sucesso');
   });
 
 })();

@@ -26,7 +26,7 @@ if (!($conn instanceof mysqli)) {
     exit;
 }
 
-// Recebe dados do formulário (application/x-www-form-urlencoded ou multipart/form-data)
+// Recebe os dados do formulário
 $email = trim((string)($_POST['email'] ?? ''));
 $senha = (string)($_POST['senha'] ?? '');
 
@@ -89,16 +89,16 @@ try {
         exit;
     }
 
-    // Segurança: renova id da sessão
+    // Renova o id da sessão
     session_regenerate_id(true);
 
-    // Padroniza chaves de sessão para compatibilidade com outros scripts
+    // Mantém as duas chaves de sessão usadas pelo projeto
     $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
     $_SESSION['user_id'] = (int)$usuario['id_usuario'];
     $_SESSION['role'] = $usuario['role'] ?? '';
     $_SESSION['user_name'] = $usuario['nome'] ?? '';
 
-    // Rehash da senha se necessário
+    // Atualiza o hash da senha, se necessário
     if (password_needs_rehash($usuario['senha'], PASSWORD_DEFAULT)) {
         $newHash = password_hash($senha, PASSWORD_DEFAULT);
         $uSql = "UPDATE usuarios SET senha = ? WHERE id_usuario = ?";
@@ -110,7 +110,7 @@ try {
         }
     }
 
-    // Atualiza último login e IP (não crítico)
+    // Atualiza o último login e o IP (não crítico)
     $sqlUpdate = "UPDATE usuarios SET ultimo_login = NOW(), last_login_ip = ? WHERE id_usuario = ?";
     $stmtUpdate = $conn->prepare($sqlUpdate);
     if ($stmtUpdate) {
@@ -122,7 +122,7 @@ try {
         error_log('login.php: falha ao preparar update: ' . $conn->error);
     }
 
-    // Resposta JSON (frontend pode usar redirect)
+    // Resposta com a URL de redirecionamento
     http_response_code(200);
     echo json_encode([
         'success' => true,
