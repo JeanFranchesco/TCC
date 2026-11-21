@@ -442,6 +442,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
+    <script>
+        /* Aplica o tema salvo antes da renderização, evitando piscar */
+        try {
+            if (localStorage.getItem('financas-theme') === 'light') {
+                document.documentElement.classList.add('light-theme');
+            }
+        } catch (e) { /* localStorage indisponível */ }
+    </script>
+
     <style>
         /* Variáveis */
         :root {
@@ -458,6 +467,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --text:        #f0f0f5;
             --text2:       #9898a8;
             --text3:       #5a5a70;
+            --hero-start:  #ffffff;
+            --hover-bg:    rgba(255,255,255,0.04);
+            --chart-grid:  rgba(255,255,255,0.05);
+        }
+
+        /* Tema claro */
+        html.light-theme {
+            --bg:          #f8f9fb;
+            --bg2:         #ffffff;
+            --surface:     #ffffff;
+            --surface2:    #f3f4f6;
+            --border:      rgba(0,0,0,0.08);
+            --border2:     rgba(0,0,0,0.14);
+            --orange:      #ff7a00;
+            --orange2:     #ff9c3a;
+            --orange-dim:  rgba(255,122,0,0.12);
+            --orange-glow: rgba(255,122,0,0.25);
+            --text:        #1a1a1d;
+            --text2:       #4a4a4e;
+            --text3:       #6e6e73;
+            --hero-start:  #1a1a1d;
+            --hover-bg:    rgba(0,0,0,0.04);
+            --chart-grid:  rgba(0,0,0,0.1);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -501,7 +533,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: clamp(3rem, 8vw, 5.5rem);
             line-height: 0.95;
             letter-spacing: -0.03em;
-            background: linear-gradient(160deg, #fff 20%, var(--orange) 85%);
+            background: linear-gradient(160deg, var(--hero-start) 20%, var(--orange) 85%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -683,7 +715,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: background 0.2s;
             margin-bottom: 4px;
         }
-        .radio-opt:hover { background: rgba(255,255,255,0.04); }
+        .radio-opt:hover { background: var(--hover-bg); }
         .radio-opt input[type="radio"] {
             width: 18px; height: 18px;
             accent-color: var(--orange);
@@ -1398,6 +1430,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <script>
+        /* Lê uma variável CSS do tema atual */
+        const corTema = nome => getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+
         new Chart(document.getElementById('chartGeral'), {
             type: 'doughnut',
             data: {
@@ -1418,7 +1453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
 
-        new Chart(document.getElementById('chartRadarFinal'), {
+        const radarFinal = new Chart(document.getElementById('chartRadarFinal'), {
             type: 'radar',
             data: {
                 labels: <?= json_encode($labels_ch) ?>,
@@ -1429,7 +1464,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     backgroundColor: 'rgba(255,145,0,0.13)',
                     borderColor: '#ff9100',
                     pointBackgroundColor: '#ff9100',
-                    pointBorderColor: '#07070a',
+                    pointBorderColor: corTema('--bg'),
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     borderWidth: 2
@@ -1439,9 +1474,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 maintainAspectRatio: false,
                 scales: {
                     r: {
-                        angleLines: { color:'rgba(255,255,255,0.05)' },
-                        grid:       { color:'rgba(255,255,255,0.05)' },
-                        pointLabels: { color:'#9898a8', font:{size:10,family:'DM Sans',weight:'500'} },
+                        angleLines: { color: corTema('--chart-grid') },
+                        grid:       { color: corTema('--chart-grid') },
+                        pointLabels: { color: corTema('--text2'), font:{size:10,family:'DM Sans',weight:'500'} },
                         ticks: { display:false },
                         suggestedMin: 0, suggestedMax: 100
                     }
@@ -1449,6 +1484,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 plugins: { legend: { display:false } }
             }
         });
+
+        /* Atualiza as cores do radar quando o tema muda */
+        new MutationObserver(() => {
+            const r = radarFinal.options.scales.r;
+            r.angleLines.color = corTema('--chart-grid');
+            r.grid.color = corTema('--chart-grid');
+            r.pointLabels.color = corTema('--text2');
+            radarFinal.data.datasets[0].pointBorderColor = corTema('--bg');
+            radarFinal.update('none');
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         </script>
 
     <?php endif; ?>
@@ -1495,9 +1540,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function openViesModal(key) {
         const d = VIES[key]; if (!d) return;
         const sinaisHTML = d.sinais.map(s => `
-            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
                 <div style="width:6px;height:6px;border-radius:50%;background:${d.cor};flex-shrink:0;margin-top:7px;"></div>
-                <span style="color:#9898a8;font-size:0.87rem;line-height:1.5;">${s}</span>
+                <span style="color:var(--text2);font-size:0.87rem;line-height:1.5;">${s}</span>
             </div>`).join('');
 
         document.getElementById('modalBody').innerHTML = `
@@ -1507,12 +1552,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div>
                     <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:${d.cor};font-weight:600;margin-bottom:4px;">${d.origem}</div>
-                    <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:#f0f0f5;margin:0;">${d.titulo}</h3>
+                    <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--text);margin:0;">${d.titulo}</h3>
                 </div>
             </div>
-            <p style="color:#9898a8;font-size:0.9rem;line-height:1.75;margin-bottom:26px;">${d.descricao}</p>
+            <p style="color:var(--text2);font-size:0.9rem;line-height:1.75;margin-bottom:26px;">${d.descricao}</p>
             <div style="margin-bottom:26px;">
-                <p style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:#5a5a70;font-weight:600;margin-bottom:12px;">Sinais de Alerta</p>
+                <p style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:12px;">Sinais de Alerta</p>
                 ${sinaisHTML}
             </div>
             <div style="background:${d.cor}0d;border:1px solid ${d.cor}33;border-radius:14px;padding:20px;">
@@ -1520,7 +1565,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-shield-halved" style="color:${d.cor};"></i>
                     <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:${d.cor};">Estratégia de Mitigação</span>
                 </div>
-                <p style="color:#b8b8c8;font-size:0.87rem;line-height:1.65;margin:0;">${d.mitigacao}</p>
+                <p style="color:var(--text2);font-size:0.87rem;line-height:1.65;margin:0;">${d.mitigacao}</p>
             </div>`;
 
         document.getElementById('viesModal').classList.add('open');
@@ -1561,6 +1606,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const el = document.getElementById('rangeVal' + num);
         if (el) el.textContent = val;
     }
+    </script>
+
+    <script type="module">
+        import { ThemeManager } from '../Java/gerenciadorTema.js';
+        ThemeManager.init();
     </script>
 
     <?php include 'chatbot.php'; ?>
